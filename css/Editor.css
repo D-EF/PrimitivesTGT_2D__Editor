@@ -1,0 +1,72 @@
+html,body{
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+:root{
+    --toolbox-width:40px;
+    --ctrlbox-width:240px;
+}
+#main-box{
+    position:absolute;
+    background-color: #444;
+    left:  var(--toolbox-width);
+    right: var(--ctrlbox-width);
+    height:100%;
+    width: auto;
+
+}
+#toolBox-box{
+    position:absolute;
+    left:0;
+    width: var(--toolbox-width);
+    height:100%;
+    border-right:#080 solid 2px;
+    background-color: #020;
+}
+#ctrlBox-box{
+    position:absolute;
+    right: 0;
+    width: var(--ctrlbox-width);
+    height:100%;
+    border-left:#080 solid 2px;
+    background-color: #020;
+}
+
+.toolBox-item{
+    width: 100%;
+    height: min-content;
+    border: #080 solid 1px;
+}
+.toolBox-item-icon{
+    display: block;
+    width: 100%;
+    padding-top: 100%;
+    background-color: var(--colorD);
+    /* cursor: pointer; */
+}
+
+.toolBox-item:hover .toolBox-item-icon{
+    background-color: var(--colorC);
+}
+
+
+
+.ctrlBox-Matrix2x2T-main{
+    display: grid;
+    grid-template-columns:1fr 1fr;
+}
+.ctrlBox-Matrix2x2T-main span{
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+
+    pointer-events:none;
+}
+.ctrlBox-Matrix2x2T-main input{
+    display: block;
+    width:100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-left:2.5em;
+}
