@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-15 18:25:43
+ * @LastEditTime: 2022-02-15 21:22:27
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -54,6 +54,21 @@ class Ctrl_Matrix2x2T extends ExCtrl{
         /**@type {Matrix2x2T} 编辑中的矩阵*/
         this.editing_matrix=new Matrix2x2T();
         this.reload(this.editing_matrix);
+        
+    }
+    callback(){
+        this.render_editing_matrix();
+    }
+    /**
+     * 将矩阵渲染到input
+     */
+    render_editing_matrix(){
+        this.elements.a.value   =this.editing_matrix.a;
+        this.elements.b.value   =this.editing_matrix.b;
+        this.elements.c.value   =this.editing_matrix.c;
+        this.elements.d.value   =this.editing_matrix.d;
+        this.elements.e.value   =this.editing_matrix.e;
+        this.elements.f.value   =this.editing_matrix.f;
     }
     /**
      * 重新读取矩阵
@@ -96,6 +111,14 @@ class Ctrl_Matrix2x2T extends ExCtrl{
             tgt.select();
         }
     }
+    /**使矩阵标准化
+     */
+    normalize(){
+        this.editing_matrix.normalize();
+        this.render_editing_matrix();
+    }
+    /**让input失去焦点
+     */
     blur(){
         if(this.lastF_ctrlid){
             this.elements[this.lastF_ctrlid].blur();
@@ -106,7 +129,7 @@ class Ctrl_Matrix2x2T extends ExCtrl{
             this.lastF_ctrlid="";
         }
     }
-    /**
+    /**鼠标滚轮操作矩阵的属性
      * @param {WheelEvent} e 
      */
     wheel(e){
@@ -121,13 +144,27 @@ class Ctrl_Matrix2x2T extends ExCtrl{
 }
 Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_Matrix2x2T");
 
+class Ctrl_tgtAssets extends ExCtrl{
+    constructor(data){
+        super();
+    }
+    
+}
+Ctrl_tgtAssets.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_tgtAssets");
+
 CtrlBox.prototype.childCtrlType={
-    Ctrl_Matrix2x2T:Ctrl_Matrix2x2T
+    Ctrl_Matrix2x2T:Ctrl_Matrix2x2T,
+    Ctrl_tgtAssets:Ctrl_tgtAssets
 }
 
 function main(){
     var toolBox = new ToolBox({
         list:[
+            {
+                name:"cursor",
+                u:5,
+                v:3,
+            },
             {
                 name:"ract",
                 u:0,
@@ -163,6 +200,7 @@ function main(){
     var canvas = document.getElementById("canvas");
     var ctx=canvas.getContext("2d");
     var renderer=new Canvas2D_TGT_Renderer();
+    
     
 }
 
