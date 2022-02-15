@@ -7,15 +7,37 @@ html,body{
     --toolbox-width:40px;
     --ctrlbox-width:240px;
 }
-#main-box{
+
+.tip{
+    display: block;
+    white-space: nowrap;
+    color: var(--colorB1);
+    font-size: 12px;
+    word-spacing: 0;
+    transform: scale(0.9);
+}
+
+#canvas-box{
     position:absolute;
     background-color: #444;
     left:  var(--toolbox-width);
     right: var(--ctrlbox-width);
     height:100%;
     width: auto;
-
 }
+#canvas-view{
+    width: 100%;
+    height:100%;
+}
+#canvas{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform: translate(-50%,-50%);
+    background-image: url(/img/SpritesMap.svg);
+    background-size:50%;
+}
+
 #toolBox-box{
     position:absolute;
     left:0;
@@ -31,8 +53,11 @@ html,body{
     height:100%;
     border-left:#080 solid 2px;
     background-color: #020;
+    color:var(--colorDT);
 }
-
+#ctrlBox-box label{
+    font-size: 12px;
+}
 .toolBox-item{
     width: 100%;
     height: min-content;
@@ -69,4 +94,16 @@ html,body{
     top: 0;
     left: 0;
     padding-left:2.5em;
+    color: var(--colorCT);
+    background-color: var(--colorB5);
+}
+.ctrlBox-Matrix2x2T-buttons{
+    /* display: grid; */
+    /* grid-template-columns:1fr 1fr; */
+    text-align: end;
+    word-spacing: -0.5em;
+}
+.ctrlBox-Matrix2x2T-button{
+    display: inline-block;
+    vertical-align: text-bottom;
 }
