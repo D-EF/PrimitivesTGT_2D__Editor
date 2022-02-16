@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-15 21:22:27
+ * @LastEditTime: 2022-02-16 21:40:34
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -11,6 +11,7 @@ import {
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
 import { Matrix2x2T, Polygon, Rect_Data, Sector_Data } from "../../Math2d.js";
+import { PrimitiveRectTGT, PrimitiveTGT_Group } from "../../PrimitivesTGT_2D.js";
 import { Canvas2D_TGT_Renderer } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 
 /**
@@ -38,8 +39,29 @@ class ToolBox extends ExCtrl {
 ToolBox.prototype.bluePrint=getVEL_thenDeleteElement("template_toolBox");
 
 class CtrlBox extends ExCtrl{
-    constructor(data){
+    /**
+     * 
+     * @param {*} data 
+     * @param {HTMLCanvasElement} canvas 
+     */
+    constructor(data,canvas){
         super(data);
+        this.canvas=canvas;
+        this.ctx=canvas.getContext("2d");
+        this.rootGroup=new PrimitiveTGT_Group();
+    }
+    ctrl_tgtAssets_dataFnc(){
+        // todo
+        this.rootGroup.addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[1].data[1].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[2].addChildren(new PrimitiveRectTGT(0,0,100,100));
+        return {
+            rootGroup:this.rootGroup
+        };
     }
 }
 CtrlBox.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrlBox");
@@ -47,6 +69,8 @@ CtrlBox.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrlBox");
 class Ctrl_Matrix2x2T extends ExCtrl{
     constructor(data){
         super(data);
+        /**@type {{list:{name:String,u:Number,v:Number}[]}} */
+        this.data;
         /**@type {String} 上一个被控制的input的ctrlID */
         this.lastF_ctrlid;
         /**@type {Delegate} 重写矩阵时的委托 会获得参数 m (矩阵) */
@@ -145,8 +169,60 @@ class Ctrl_Matrix2x2T extends ExCtrl{
 Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_Matrix2x2T");
 
 class Ctrl_tgtAssets extends ExCtrl{
+    /**
+     * 
+     * @param {{rootGroup:PrimitiveTGT_Group}} data 
+     */
     constructor(data){
-        super();
+        super(data);
+        /** @type {{ctx:CanvasRenderingContext2D}} */
+        this.data;
+        console.log(data);
+        this.renderer=new Canvas2D_TGT_Renderer(this.data.ctx);
+        /**@type {PrimitiveTGT_Group[]} 遍历渲染时当前项的路径 */
+        this.gg=[data.rootGroup];
+        /**@type {Number[]} 遍历渲染时当前项的路径(下标形式) */
+        this.gi=[0];
+        this.depth=0;
+    }
+    resetWalker(){
+        this.depth=0 , this.gi.length=1 , this.gi[0]=0 , this.gg.length=1;
+    }
+    regress(){
+        this.depth=-1;
+        debugger;
+        return;
+        console.log(this.depth);
+        this.gg[this.depth]=this.gg[this.depth-1].data[++this.gi[this.depth]];
+        if(this.gg[this.depth]){
+            if(this.gg[this.depth].dataType==="Group"){
+                ++this.depth;
+            }
+            return;
+        }
+        do{
+            this.gi[this.depth]=0;
+            --this.depth;
+        }while(!this.gg[this.depth].data[++this.gi[this.depth]]);
+    }
+    /**
+     * 折叠操作的函数
+     * @param {HTMLLIElement} element 
+     */
+    folded(e,tgt){
+
+    }
+    /**
+     * 刷新列表折叠
+     */
+    re_folded_css(){
+        /*ctrlBox-tgtAssets-item-depth(d):nth-of-type(index)~li:not(ctrlBox-tgtAssets-item-depth(d):nth-of-type(index+1)~li)*/
+        var folded_CSS_Selects=[],
+            unhidden_CSS_Selects=[];
+        
+        this.folded_CSS_Select=folded_CSS_Selects.join();
+        this.unhidden_CSS_Selects=unhidden_CSS_Selects.join();
+        this.renderStyle();
     }
     
 }
@@ -192,15 +268,13 @@ function main(){
             },
         ]
     }),
-    ctrlBox = new CtrlBox();
+    canvas = document.getElementById("canvas"),
+    ctrlBox = new CtrlBox({},canvas);
+
     toolBox.addend(document.getElementById("toolBox-box"));
     ctrlBox.addend(document.getElementById("ctrlBox-box"));
 
 
-    var canvas = document.getElementById("canvas");
-    var ctx=canvas.getContext("2d");
-    var renderer=new Canvas2D_TGT_Renderer();
-    
     
 }
 

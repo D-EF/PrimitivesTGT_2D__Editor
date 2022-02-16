@@ -107,3 +107,16 @@ html,body{
     display: inline-block;
     vertical-align: text-bottom;
 }
+
+.ctrlBox-tgtAssets-item-color_0{
+    background-color:#f00;
+    color:#0f0;
+}
+.ctrlBox-tgtAssets-item-color_1{
+    background-color:#0f0;
+    color:#f00;
+}
+.ctrlBox-tgtAssets-item-color_2{
+    background-color:#00f;
+    color:#0f0;
+}
