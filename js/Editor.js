@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-16 21:40:34
+ * @LastEditTime: 2022-02-17 20:58:23
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -11,7 +11,7 @@ import {
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
 import { Matrix2x2T, Polygon, Rect_Data, Sector_Data } from "../../Math2d.js";
-import { PrimitiveRectTGT, PrimitiveTGT_Group } from "../../PrimitivesTGT_2D.js";
+import { PrimitiveArcTGT, PrimitiveRectTGT, PrimitiveTGT_Group } from "../../PrimitivesTGT_2D.js";
 import { Canvas2D_TGT_Renderer } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 
 /**
@@ -51,14 +51,7 @@ class CtrlBox extends ExCtrl{
         this.rootGroup=new PrimitiveTGT_Group();
     }
     ctrl_tgtAssets_dataFnc(){
-        // todo
-        this.rootGroup.addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[1].data[1].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[2].addChildren(new PrimitiveRectTGT(0,0,100,100));
+        // todo 初始化对象
         return {
             rootGroup:this.rootGroup
         };
@@ -179,50 +172,122 @@ class Ctrl_tgtAssets extends ExCtrl{
         this.data;
         console.log(data);
         this.renderer=new Canvas2D_TGT_Renderer(this.data.ctx);
+        /**@type {PrimitiveTGT_Group} 图元根路径 */
+        this.rootGroup=data.rootGroup;
         /**@type {PrimitiveTGT_Group[]} 遍历渲染时当前项的路径 */
-        this.gg=[data.rootGroup];
+        this.gg=[this.rootGroup.data[0]];
         /**@type {Number[]} 遍历渲染时当前项的路径(下标形式) */
         this.gi=[0];
         this.depth=0;
+        this.t_depth=0;
+        /**@type {Map<Number,{d:Number,ed:Number}>} 被折叠的 index : 深度  */
+        this.folded_data=new Map();
     }
     resetWalker(){
-        this.depth=0 , this.gi.length=1 , this.gi[0]=0 , this.gg.length=1;
+        this.depth=0;
+        this.t_depth=0;
+        this.gi.length=1;
+        this.gi[0]=0;
+        this.gg.length=1;
+        this.gg[0]=this.rootGroup.data[0];
+        this.di=0;
+        this.regress();
+    }
+    getParent(depth){
+        return (depth?this.gg[depth-1]:this.rootGroup);
     }
     regress(){
-        this.depth=-1;
-        debugger;
-        return;
-        console.log(this.depth);
-        this.gg[this.depth]=this.gg[this.depth-1].data[++this.gi[this.depth]];
-        if(this.gg[this.depth]){
-            if(this.gg[this.depth].dataType==="Group"){
-                ++this.depth;
-            }
-            return;
-        }
+        // debugger;
+        ++this.di;
+        var gg=this.gg,
+        gi=this.gi,
+        d=this.t_depth,
+        od=this.depth;
+        gg[d]=this.getParent(d).data[gi[d]];
         do{
-            this.gi[this.depth]=0;
-            --this.depth;
-        }while(!this.gg[this.depth].data[++this.gi[this.depth]]);
+            if(gg[d]!=undefined){
+                od=d;
+                if(gg[d].dataType==="Group" && gg[d].data.length){
+                    console.log(gg[d].data.length)
+                    ++d;
+                    gi[d]=0;
+                    gg[d]=this.getParent(d).data[gi[d]];
+                }
+                else{
+                    gi[d]++;
+                    if(this.getParent(d).data[gi[d]]===undefined){
+                        break;
+                    }
+                }
+                this.depth=od;
+                this.t_depth=d;
+                return;
+            }
+        }while(0);
+        do{
+            --d;
+            ++gi[d];
+        }while(d>=0&&(gg[d]===undefined));
+        
+        this.depth=od;
+        this.t_depth=d;
+    }
+    
+    /**重新定向操作对象
+     * @param {Array<Number,String>} path root 对象的子 的 下标形式的路径
+     */
+    redirect_editTGT(path){
+        // todo 重定向操作对象
+    }
+
+    /**点击事件操作手柄
+     * @param {Element} element 
+     */
+    listClick_hand(element){
+        if(Number(element.getAttribute("child_length"))){
+            return this.fold_item(element);
+        }
+        if(Number(element.className.indexOf("ctrlBox-tgtAssets-iseditingBtn")!==-1)){
+            return this.redirect_editTGT(element.parentElement.getAttribute("path").split(","));
+        }
     }
     /**
      * 折叠操作的函数
-     * @param {HTMLLIElement} element 
+     * @param {Element} element 
      */
-    folded(e,tgt){
+    fold_item(element){
+        var i=Number(element.getAttribute("index")),
+            d,ed,temp_element=element;
+        if(this.folded_data.has(i)){
+            this.folded_data.delete(i);
+        }else{
+            ed=i;
+            d=Number(element.getAttribute("depth"));
 
+            while((temp_element=temp_element.nextElementSibling)&&Number(temp_element.getAttribute("depth"))>d){
+                ++ed;
+            }
+            this.folded_data.set(i,{d:d,ed:ed});
+            
+        }
+        this.renderStyle();
     }
     /**
-     * 刷新列表折叠
+     * 刷新列表折叠样式
      */
-    re_folded_css(){
-        /*ctrlBox-tgtAssets-item-depth(d):nth-of-type(index)~li:not(ctrlBox-tgtAssets-item-depth(d):nth-of-type(index+1)~li)*/
-        var folded_CSS_Selects=[],
-            unhidden_CSS_Selects=[];
-        
-        this.folded_CSS_Select=folded_CSS_Selects.join();
-        this.unhidden_CSS_Selects=unhidden_CSS_Selects.join();
-        this.renderStyle();
+    get folded_CSS_Select(){
+        /*ctrlBox-tgtAssets-item-depth(d):nth-child(index)~li:not(ctrlBox-tgtAssets-item-depth(d):nth-child(index+1)~li)*/
+        var folded_data=this.folded_data,
+            folded_CSS_Selects=[],
+            i,ed,data;
+
+        for(data of folded_data){
+            i=data[0];
+            ed=data[1].ed;
+            console.log(data);
+            folded_CSS_Selects.unshift(',.CtrlLib-'+this.ctrlLibID+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")");
+        }
+        return ".ctrlBox-tgtAssets-item:nth-child(0)"+folded_CSS_Selects.join('');
     }
     
 }
@@ -279,3 +344,19 @@ function main(){
 }
 
 main();
+
+// // 复制图片
+// onCopyImg() {
+//     let dom = document.getElementsByClassName("screenLeft")[0];
+//     html2canvas(dom, { useCORS: true }).then((canvasFull) => {
+//       console.log(canvasFull);
+//       canvasFull.toBlob((blob) => {
+//         const item = new ClipboardItem({ "image/png": blob });
+//         navigator.clipboard.write([item]);
+//         this.$message({
+//           showClose: true,
+//           message: "复制成功",
+//         });
+//       });
+//     });
+//   }
