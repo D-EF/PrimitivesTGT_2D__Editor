@@ -34,8 +34,9 @@ html,body{
     left:50%;
     top:50%;
     transform: translate(-50%,-50%);
-    background-image: url(/img/SpritesMap.svg);
+    /* background-image: url(/img/SpritesMap.svg); */
     background-size:50%;
+    background-color: #fff;
 }
 
 #toolBox-box{
@@ -54,6 +55,7 @@ html,body{
     border-left:#080 solid 2px;
     background-color: #020;
     color:var(--colorDT);
+    user-select: none;
 }
 #ctrlBox-box label{
     font-size: 12px;
@@ -107,7 +109,6 @@ html,body{
     display: inline-block;
     vertical-align: text-bottom;
 }
-
 .ctrlBox-tgtAssets-item-color_0{
     background-color:#f00;
     color:#0f0;
@@ -120,3 +121,55 @@ html,body{
     background-color:#00f;
     color:#0f0;
 }
+
+.ctrlBox-tgtAssets-item{
+    line-height: 1.25em;
+    height: 1.25em;
+    width: auto;
+    padding-left:2em;
+}
+.ctrlBox-tgtAssets-iseditingBtn,.ctrlBox-tgtAssets-iseditingBtn::before{
+    display: block;
+    position:absolute;
+    left: 0.3em;
+    top:50%;
+    width:0.8em;
+    height:0.8em;
+    border:#000 0.13em solid; 
+    border-radius: 50%;
+    background-color: var(--colorA3);
+    transform: translateY(-50%);
+}
+
+.ctrlBox-tgtAssets-iseditingBtn::before{
+    width: 50%;
+    height: 50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+}
+.ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn,
+.ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before{
+    border-radius: 0%;
+}
+
+.ctrlBox-tgtAssets-item-color_0 .ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before{
+    content:"";
+    background-color:#f00;
+    border-color: #0f0;
+}
+.ctrlBox-tgtAssets-item-color_1 .ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before{
+    content:"";
+    background-color:#00f;
+    border-color: #f00;
+}
+.ctrlBox-tgtAssets-item-color_2 .ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before.ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before{
+    content:"";
+    background-color:#0f0;
+    border-color: #f00;
+}
+
+
+    
+/* .CtrlLib-3 .ctrlBox-tgtAssets-item:nth-child(1) {
+    display: none;
+} */
