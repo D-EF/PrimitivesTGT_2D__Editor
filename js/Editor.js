@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-18 17:57:21
+ * @LastEditTime: 2022-02-18 20:26:30
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -66,8 +66,11 @@ class CtrlBox extends ExCtrl{
         this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
         this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
         this.rootGroup.data[1].data[1].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[1].data[1].data[0].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[1].data[1].data[0].data[0].addChildren(new PrimitiveTGT_Group());
         this.rootGroup.addChildren(new PrimitiveTGT_Group());
         this.rootGroup.data[2].addChildren(new PrimitiveRectTGT(0,0,100,100));
+        this.rootGroup.addChildren(new PrimitiveTGT_Group());
         return {
             rootGroup:this.rootGroup
         };
@@ -219,10 +222,15 @@ class Ctrl_tgtAssets extends ExCtrl{
         gi=this.gi,
         d=this.t_depth,
         od=this.depth;
+        if(d<0){
+            this.depth=d;
+            return;
+        }
         gg[d]=this.getParent(d).data[gi[d]];
         do{
             if(gg[d]!=undefined){
                 od=d;
+                this.depth=od;
                 if(gg[d].dataType==="Group" && gg[d].data.length){
                     console.log(gg[d].data.length)
                     ++d;
@@ -235,7 +243,6 @@ class Ctrl_tgtAssets extends ExCtrl{
                         break;
                     }
                 }
-                this.depth=od;
                 this.t_depth=d;
                 return;
             }
@@ -243,12 +250,10 @@ class Ctrl_tgtAssets extends ExCtrl{
         do{
             --d;
             ++gi[d];
-        }while(d>=0&&(gg[d]===undefined));
-        
-        this.depth=od;
+        }while(d>=0&&((gg[d]=this.getParent(d).data[gi[d]])===undefined));
+        // this.depth=od;
         this.t_depth=d;
     }
-    
     /**重新定向操作对象
      * @param {Array<Number,String>} path root 对象的子 的 下标形式的路径
      * @param {Number} index 渲染到控件中时的下标
