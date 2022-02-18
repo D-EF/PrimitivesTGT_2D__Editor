@@ -1,7 +1,7 @@
 <!--
  * @Date: 2022-02-12 14:43:03
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-18 20:26:52
+ * @LastEditTime: 2022-02-18 21:32:01
  * @FilePath: \def-web\js\visual\Editor\Editor.html
 -->
 <!DOCTYPE html>
@@ -80,9 +80,8 @@
                     class="ctrlBox-tgtAssets-item ctrlBox-tgtAssets-item-color_${this.depth%3}"
                     path="${this.gi.join()}"
                     style="margin-left:${this.depth*12}px;">
-                    <i class="ctrlBox-tgtAssets-isEditingBtn "></i>
-                    <i class="ctrlBox-tgtAssets-want_render ">
-                        <i class="iconSpritesSvg iconSpritesSvg-${this.gg[this.depth].want_render?3:4}0"></i>
+                    <i class="ctrlBox-tgtAssets-isEditingBtn" ctrl-id="isEditingBtn"></i>
+                    <i class="ctrlBox-tgtAssets-visibility"><i class="iconSpritesSvg iconSpritesSvg-${this.gg[this.depth].visibility?3:4}0"></i>
                     </i>
                     ${this.gi.join()}
                     D-${this.depth}
@@ -90,14 +89,15 @@
             </ul>
         </div>
     </template>
-    
-    <div id="canvas-box">
-        <div id="canvas-view">
-            <canvas id="canvas" width="500" height="500"></canvas>
+    <main id="dom-Body-Root">
+        <div id="canvas-box">
+            <div id="canvas-view">
+                <canvas id="canvas" width="500" height="500"></canvas>
+            </div>
         </div>
-    </div>
-    <div id="toolBox-box"></div>
-    <div id="ctrlBox-box"></div>
+        <div id="toolBox-box"></div>
+        <div id="ctrlBox-box"></div>
+    </main>
     <script src="./js/Editor.js" type="module"></script>
 </body>
 </html>

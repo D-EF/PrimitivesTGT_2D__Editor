@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-18 20:26:30
+ * @LastEditTime: 2022-02-18 21:08:49
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -50,11 +50,10 @@ class CtrlBox extends ExCtrl{
         this.ctx=canvas.getContext("2d");
         this.rootGroup=new PrimitiveTGT_Group();
     }
-    /**
-     * 
+    /**更改对象隐藏
      * @param {*} path 
      */
-    hidden_tgt(path){
+    change_editTGT_visibility(path){
 
     }
     ctrl_tgtAssets_dataFnc(){
@@ -260,23 +259,27 @@ class Ctrl_tgtAssets extends ExCtrl{
      */
     redirect_editTGT(path,index){
         var ctrlID="isEditingBtn-EX_for-tgt_list-C"+index;
+        console.log(ctrlID);
         if(this.old_id!==ctrlID){
             this.elements[ctrlID].classList.add("ctrlBox-tgtAssets-isEditingBtn-editing");
             this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-isEditingBtn-editing");
             this.old_id=ctrlID;
         }
+
     }
-    redirect_editTGT(path,index){
+    /**隐藏对象 (不渲染)
+     * @param {路径} path 
+     */
+    change_editTGT_visibility(path){
         this.callParent(
         /**
          * @this {CtrlBox} 
          */
         function(){
-            this.hidden_tgt()
-        },)
+            this.change_editTGT_visibility(path);
+        })
+
     }
-
-
     /**点击事件操作手柄
      * @param {Element} element 
      */
@@ -289,9 +292,16 @@ class Ctrl_tgtAssets extends ExCtrl{
             temp=element.parentElement;
             return this.redirect_editTGT(temp.getAttribute("path").split(","),temp.getAttribute("index"));
         }
-        if(Number(element.className.indexOf("ctrlBox-tgtAssets-want_render")!==-1)){
+        if(Number(element.className.indexOf("ctrlBox-tgtAssets-visibility")!==-1)){
             temp=element.parentElement;
-            return this.redirect_editTGT(temp.getAttribute("path").split(","),temp.getAttribute("index"));
+            var iconElement=element.firstElementChild;
+            if(iconElement.className==="iconSpritesSvg iconSpritesSvg-40"){
+                iconElement.className="iconSpritesSvg iconSpritesSvg-30"
+                return this.change_editTGT_visibility(temp.getAttribute("path").split(","),temp.getAttribute("index"),false);
+            }else{
+                iconElement.className="iconSpritesSvg iconSpritesSvg-40"
+                return this.change_editTGT_visibility(temp.getAttribute("path").split(","),temp.getAttribute("index"),true);
+            }
         }
     }
     /**
