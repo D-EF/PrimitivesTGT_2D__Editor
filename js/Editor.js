@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-17 20:58:23
+ * @LastEditTime: 2022-02-18 17:57:21
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -50,8 +50,24 @@ class CtrlBox extends ExCtrl{
         this.ctx=canvas.getContext("2d");
         this.rootGroup=new PrimitiveTGT_Group();
     }
+    /**
+     * 
+     * @param {*} path 
+     */
+    hidden_tgt(path){
+
+    }
     ctrl_tgtAssets_dataFnc(){
         // todo 初始化对象
+        this.rootGroup.addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[0].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[0].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[1].data[1].addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.addChildren(new PrimitiveTGT_Group());
+        this.rootGroup.data[2].addChildren(new PrimitiveRectTGT(0,0,100,100));
         return {
             rootGroup:this.rootGroup
         };
@@ -235,20 +251,42 @@ class Ctrl_tgtAssets extends ExCtrl{
     
     /**重新定向操作对象
      * @param {Array<Number,String>} path root 对象的子 的 下标形式的路径
+     * @param {Number} index 渲染到控件中时的下标
      */
-    redirect_editTGT(path){
-        // todo 重定向操作对象
+    redirect_editTGT(path,index){
+        var ctrlID="isEditingBtn-EX_for-tgt_list-C"+index;
+        if(this.old_id!==ctrlID){
+            this.elements[ctrlID].classList.add("ctrlBox-tgtAssets-isEditingBtn-editing");
+            this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-isEditingBtn-editing");
+            this.old_id=ctrlID;
+        }
     }
+    redirect_editTGT(path,index){
+        this.callParent(
+        /**
+         * @this {CtrlBox} 
+         */
+        function(){
+            this.hidden_tgt()
+        },)
+    }
+
 
     /**点击事件操作手柄
      * @param {Element} element 
      */
     listClick_hand(element){
+        var temp;
         if(Number(element.getAttribute("child_length"))){
             return this.fold_item(element);
         }
-        if(Number(element.className.indexOf("ctrlBox-tgtAssets-iseditingBtn")!==-1)){
-            return this.redirect_editTGT(element.parentElement.getAttribute("path").split(","));
+        if(Number(element.className.indexOf("ctrlBox-tgtAssets-isEditingBtn")!==-1)){
+            temp=element.parentElement;
+            return this.redirect_editTGT(temp.getAttribute("path").split(","),temp.getAttribute("index"));
+        }
+        if(Number(element.className.indexOf("ctrlBox-tgtAssets-want_render")!==-1)){
+            temp=element.parentElement;
+            return this.redirect_editTGT(temp.getAttribute("path").split(","),temp.getAttribute("index"));
         }
     }
     /**
@@ -280,19 +318,19 @@ class Ctrl_tgtAssets extends ExCtrl{
         var folded_data=this.folded_data,
             folded_CSS_Selects=[],
             i,ed,data;
-
         for(data of folded_data){
             i=data[0];
             ed=data[1].ed;
             console.log(data);
             folded_CSS_Selects.unshift(',.CtrlLib-'+this.ctrlLibID+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")");
         }
-        return ".ctrlBox-tgtAssets-item:nth-child(0)"+folded_CSS_Selects.join('');
+        return ".cnm"+folded_CSS_Selects.join('');
     }
     
 }
 Ctrl_tgtAssets.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_tgtAssets");
 
+window.Ctrl_tgtAssets=Ctrl_tgtAssets;
 CtrlBox.prototype.childCtrlType={
     Ctrl_Matrix2x2T:Ctrl_Matrix2x2T,
     Ctrl_tgtAssets:Ctrl_tgtAssets
@@ -338,9 +376,6 @@ function main(){
 
     toolBox.addend(document.getElementById("toolBox-box"));
     ctrlBox.addend(document.getElementById("ctrlBox-box"));
-
-
-    
 }
 
 main();

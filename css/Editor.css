@@ -78,6 +78,11 @@ html,body{
 }
 
 
+.ctrlBox-subModuleBox{
+    padding:2px;
+    border:#0f0 solid 1px;
+    margin:2px;
+}
 
 .ctrlBox-Matrix2x2T-main{
     display: grid;
@@ -109,6 +114,13 @@ html,body{
     display: inline-block;
     vertical-align: text-bottom;
 }
+
+.ctrlBox-tgtAssets_main{
+    height:244px;
+    overflow-y: scroll;
+}
+
+
 .ctrlBox-tgtAssets-item-color_0{
     background-color:#f00;
     color:#0f0;
@@ -126,50 +138,53 @@ html,body{
     line-height: 1.25em;
     height: 1.25em;
     width: auto;
-    padding-left:2em;
+    padding-left:2.2em;
 }
-.ctrlBox-tgtAssets-iseditingBtn,.ctrlBox-tgtAssets-iseditingBtn::before{
+.ctrlBox-tgtAssets-isEditingBtn,.ctrlBox-tgtAssets-isEditingBtn::before{
     display: block;
     position:absolute;
     left: 0.3em;
     top:50%;
     width:0.8em;
     height:0.8em;
-    border:#000 0.13em solid; 
+    border:#000 0.08em solid; 
     border-radius: 50%;
     background-color: var(--colorA3);
     transform: translateY(-50%);
 }
 
-.ctrlBox-tgtAssets-iseditingBtn::before{
-    width: 50%;
-    height: 50%;
+.ctrlBox-tgtAssets-isEditingBtn::before{
+    width:  80%;
+    height: 80%;
     left:50%;
+    top:50%;
     transform: translate(-50%,-50%);
+    border-radius: 0%;
+    background-color:#fff;
+    border-style: none;
+    border-width: 0;
 }
-.ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn,
-.ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before{
+.ctrlBox-tgtAssets-isEditingBtn-editing.ctrlBox-tgtAssets-isEditingBtn{
+
     border-radius: 0%;
 }
-
-.ctrlBox-tgtAssets-item-color_0 .ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before{
+.ctrlBox-tgtAssets-isEditingBtn-editing.ctrlBox-tgtAssets-isEditingBtn::before{
     content:"";
-    background-color:#f00;
-    border-color: #0f0;
 }
-.ctrlBox-tgtAssets-item-color_1 .ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before{
-    content:"";
-    background-color:#00f;
-    border-color: #f00;
-}
-.ctrlBox-tgtAssets-item-color_2 .ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before.ctrlBox-tgtAssets-iseditingBtn-editing.ctrlBox-tgtAssets-iseditingBtn::before{
-    content:"";
-    background-color:#0f0;
-    border-color: #f00;
+.ctrlBox-tgtAssets-want_render{
+    position: absolute;
+    left: 1.3em;
+    width:0.8em;
+    height:0.8em;
+    top:50%;
+    transform: translateY(-50%);
+    background-color: #000;
 }
 
-
-    
-/* .CtrlLib-3 .ctrlBox-tgtAssets-item:nth-child(1) {
-    display: none;
-} */
+.ctrlBox-tgtAssets-want_render>.iconSpritesSvg{
+    position: absolute;
+    width:  100%;
+    height: 100%;
+    background-color: #fff;
+    pointer-events:none;
+}

@@ -1,7 +1,7 @@
 <!--
  * @Date: 2022-02-12 14:43:03
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-17 20:58:48
+ * @LastEditTime: 2022-02-18 19:17:34
  * @FilePath: \def-web\js\visual\Editor\Editor.html
 -->
 <!DOCTYPE html>
@@ -31,8 +31,12 @@
     </template>
     <template id="template_ctrlBox">
         <div class="ctrlBox-main">
-            <div ctrl-child_ctrl="Ctrl_Matrix2x2T"></div>
-            <div ctrl-child_ctrl="Ctrl_tgtAssets" ctrl-child_ctrl_arguments="this.ctrl_tgtAssets_dataFnc()"></div>
+            <div class="ctrlBox-subModuleBox">
+                <div ctrl-child_ctrl="Ctrl_tgtAssets" ctrl-child_ctrl_arguments="this.ctrl_tgtAssets_dataFnc()"></div>
+            </div>
+            <div class="ctrlBox-subModuleBox">
+                <div ctrl-child_ctrl="Ctrl_Matrix2x2T"></div>
+            </div>
         </div>
     </template>
     <template id="template_ctrl_Matrix2x2T">
@@ -71,13 +75,17 @@
             }
         </ctrlstyle>
         <div>
-            <ul class="ctrlBox-tgtAssets_main" ctrl-for="this.resetWalker(); this.t_depth>=0; this.regress()" pa-click="this.listClick_hand(e.target)">
-                <li index="${this.di}" depth="${this.depth}" child_length="${this.gg[this.depth].data.length}" 
+            <ul ctrl-id="tgt_list" class="ctrlBox-tgtAssets_main" ctrl-for="this.resetWalker(); this.t_depth>=0; this.regress()" pa-click="this.listClick_hand(e.target)">
+                <li ctrl-id="tgt_item" index="${this.di}" depth="${this.depth}" child_length="${this.gg[this.depth].data.length}" 
                     class="ctrlBox-tgtAssets-item ctrlBox-tgtAssets-item-color_${this.depth%3}"
                     path="${this.gi.join()}"
                     style="margin-left:${this.depth*12}px;">
-                    <i class="ctrlBox-tgtAssets-iseditingBtn "></i>
-                    ${this.gg[this.depth].name}233
+                    <i class="ctrlBox-tgtAssets-isEditingBtn "></i>
+                    <i class="ctrlBox-tgtAssets-want_render ">
+                        <i class="iconSpritesSvg iconSpritesSvg-${this.gg[this.depth].want_render?3:4}0"></i>
+                    </i>
+                    ${this.gg[this.depth].name}
+                    ${this.gg[this.depth].dataType}
                 </li>
             </ul>
         </div>
