@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-18 21:08:49
+ * @LastEditTime: 2022-02-21 21:50:25
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -10,9 +10,9 @@ import {
     DEF_VirtualElementList as VEL,
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
-import { Matrix2x2T, Polygon, Rect_Data, Sector_Data } from "../../Math2d.js";
-import { PrimitiveArcTGT, PrimitiveRectTGT, PrimitiveTGT_Group } from "../../PrimitivesTGT_2D.js";
-import { Canvas2D_TGT_Renderer } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
+import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Rect_Data, Sector_Data, Vector2 } from "../../Math2d.js";
+import { Material, PrimitiveArcTGT, PrimitiveBezierTGT, PrimitiveRectTGT, PrimitiveTGT_Group } from "../../PrimitivesTGT_2D.js";
+import { Canvas2d_Material, Canvas2D_TGT_Renderer, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 
 /**
  * 获取
@@ -48,7 +48,15 @@ class CtrlBox extends ExCtrl{
         super(data);
         this.canvas=canvas;
         this.ctx=canvas.getContext("2d");
+        this.canvas_renderer=new Canvas2D_TGT_Renderer([],this.ctx);
         this.rootGroup=new PrimitiveTGT_Group();
+        this.canvas_renderer.add(this.rootGroup);
+    }
+    /** 渲染 图元 内容
+     * 
+     */
+    renderCanvas(){
+        this.canvas_renderer.render_all();
     }
     /**更改对象隐藏
      * @param {*} path 
@@ -57,19 +65,6 @@ class CtrlBox extends ExCtrl{
 
     }
     ctrl_tgtAssets_dataFnc(){
-        // todo 初始化对象
-        this.rootGroup.addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[0].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[0].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[1].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[1].data[1].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[1].data[1].data[0].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[1].data[1].data[0].data[0].addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.addChildren(new PrimitiveTGT_Group());
-        this.rootGroup.data[2].addChildren(new PrimitiveRectTGT(0,0,100,100));
-        this.rootGroup.addChildren(new PrimitiveTGT_Group());
         return {
             rootGroup:this.rootGroup
         };
@@ -210,6 +205,9 @@ class Ctrl_tgtAssets extends ExCtrl{
         this.gg[0]=this.rootGroup.data[0];
         this.di=0;
         this.regress();
+        if(!this.rootGroup.data.length){
+            this.depth=-1;
+        }
     }
     getParent(depth){
         return (depth?this.gg[depth-1]:this.rootGroup);
@@ -388,9 +386,40 @@ function main(){
     }),
     canvas = document.getElementById("canvas"),
     ctrlBox = new CtrlBox({},canvas);
-
+    
+    window.ctx=canvas.getContext("2d");
     toolBox.addend(document.getElementById("toolBox-box"));
     ctrlBox.addend(document.getElementById("ctrlBox-box"));
+    var k=[],j=0;
+    canvas.onclick=function(e){
+        k[j]=new Vector2(e.offsetX,e.offsetY);
+        CtrlCanvas2d.dot(ctx,k[j]);
+        ++j;
+        if(j===3){
+            var bz=Math2D.create_bezier_3_by_3_point(k[0],k[1],k[2]);
+            var temp=new Bezier_Polygon();
+            temp.pushNodes([
+                {
+                    node:bz.points[0],
+                    hand_after:bz.points[1]
+                },
+                {
+                    hand_before:bz.points[2],
+                    node:bz.points[3]
+                }
+            ]);
+            CtrlCanvas2d.dot(ctx,bz.points[1]);
+            CtrlCanvas2d.dot(ctx,bz.points[2]);
+            CtrlCanvas2d.dot(ctx,e1,2,"#0f0");
+            CtrlCanvas2d.dot(ctx,e2,2,"#0f0");
+            
+            var temp_tgt=new PrimitiveBezierTGT(temp)
+            temp_tgt.fill_Material=new Canvas2d_Material("#0000");
+            ctrlBox.rootGroup.addChildren(temp_tgt);
+
+            ctrlBox.renderCanvas();
+        }
+    }
 }
 
 main();
