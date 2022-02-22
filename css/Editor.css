@@ -32,7 +32,7 @@ html,body{
     word-spacing: 0;
     transform: scale(0.9);
 }
-#dom-Body-Root{
+.dom-Body-Root{
     position: absolute;
     overflow: hidden;
     width: 100%;
@@ -40,7 +40,7 @@ html,body{
     font-size:16px;
 }
 
-#canvas-box{
+.canvas-box{
     position:absolute;
     background-color: #444;
     left:  var(--toolbox-width);
@@ -48,11 +48,11 @@ html,body{
     height:100%;
     width: auto;
 }
-#canvas-view{
+.canvas-view{
     width: 100%;
     height:100%;
 }
-#canvas{
+.canvas{
     position:absolute;
     left:50%;
     top:50%;
@@ -62,7 +62,7 @@ html,body{
     background-color: #fff;
 }
 
-#toolBox-box{
+.toolBox-box{
     position:absolute;
     left:0;
     width: var(--toolbox-width);
@@ -70,7 +70,7 @@ html,body{
     border-right:#080 solid 2px;
     background-color: #020;
 }
-#ctrlBox-box{
+.ctrlBox-box{
     position:absolute;
     right: 0;
     width: var(--ctrlbox-width);
@@ -80,7 +80,7 @@ html,body{
     color:var(--colorDT);
     user-select: none;
 }
-#ctrlBox-box label{
+.ctrlBox-box label{
     font-size: 12px;
 }
 .toolBox-item{

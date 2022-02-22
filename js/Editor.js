@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-22 10:47:58
+ * @LastEditTime: 2022-02-22 21:40:44
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -24,6 +24,7 @@ function getVEL_thenDeleteElement(id){
     tgt.remove();
     return rtn;
 }
+
 
 class ToolBox extends ExCtrl {
     constructor(data){
@@ -52,8 +53,14 @@ class CtrlBox extends ExCtrl{
         this.rootGroup=new PrimitiveTGT_Group();
         this.canvas_renderer.add(this.rootGroup);
     }
-    /** 渲染 图元 内容
-     * 
+    renderTGT_Assets(){
+        this.callChild("_tgtAssets",
+        /** @param {Ctrl_tgtAssets} that */
+        function(that){
+            that.reRender();
+        })
+    }
+    /** 渲染 图元内容 到画布上
      */
     renderCanvas(){
         this.canvas_renderer.render_all();
@@ -80,7 +87,7 @@ class Ctrl_Matrix2x2T extends ExCtrl{
         /**@type {String} 上一个被控制的input的ctrlID */
         this.lastF_ctrlid;
         /**@type {Delegate} 重写矩阵时的委托 会获得参数 m (矩阵) */
-        this.reset_D=Delegate.ctrate();
+        this.reset_D=Delegate.create();
         /**@type {Matrix2x2T} 编辑中的矩阵*/
         this.editing_matrix=new Matrix2x2T();
         this.reload(this.editing_matrix);
@@ -349,9 +356,21 @@ CtrlBox.prototype.childCtrlType={
     Ctrl_tgtAssets:Ctrl_tgtAssets
 }
 
-function main(){
-    var toolBox = new ToolBox({
-        list:[
+class Canvas_Main extends ExCtrl{
+    constructor(data){
+        super(data);
+        this.canvas=document.createElement("canvas");
+        this.canvas.className="canvas";
+        this.canvas.width=500;
+        this.canvas.height=500;
+        // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
+        
+        this.addCtrlAction("callback",function(){
+            this.elements["canvas_main"].appendChild(this.canvas)
+        });
+    }
+    toolbox_init(){
+        return {list:[
             {
                 name:"cursor",
                 u:5,
@@ -382,57 +401,22 @@ function main(){
                 u:4,
                 v:5,
             },
-        ]
-    }),
-    canvas = document.getElementById("canvas"),
-    ctrlBox = new CtrlBox({},canvas);
-    
-    window.ctx=canvas.getContext("2d");
-    toolBox.addend(document.getElementById("toolBox-box"));
-    ctrlBox.addend(document.getElementById("ctrlBox-box"));
-    var k=[],j=0,f=true;
-    canvas.onclick=function(e){
-        k[j]=new Vector2(e.offsetX,e.offsetY);
-        CtrlCanvas2d.dot(ctx,k[j]);
-        ++j;
-        if(j===3&&f){
-            f=false;
-            var bz=Math2D.create_bezier_3_by_3_point(k[0],k[1],k[2]);
-            var temp=new Bezier_Polygon();
-            temp.pushNodes([
-                {
-                    node:bz.points[0],
-                    hand_after:bz.points[1]
-                },
-                {
-                    hand_before:bz.points[2],
-                    node:bz.points[3]
-                }
-            ]);
-            
-            var temp_tgt=new PrimitiveBezierTGT(temp)
-            temp_tgt.fill_Material=new Canvas2d_Material("#0000");
-            ctrlBox.rootGroup.addChildren(temp_tgt);
-            k[0]=k[2];
-            j=1;
-        }
-        if(j==3&&!f){
-            var bz=Math2D.create_bezier_3_by_3_point(k[j-3],k[j-2],k[j-1]);
-            var temp=ctrlBox.rootGroup.data[0];
-            var i=temp.data.nodes.length-1;
-            temp.data.nodes[i].hand_after=bz.points[1];
-
-            temp.data.nodes[i+1]={
-                hand_before:bz.points[2],
-                node:bz.points[3]
-            };
-            k[0]=k[2];
-            j=0;
-        }
-        ctrlBox.renderCanvas();
+        ]}
+    }
+    ctrlbox_init(){
+        return [{},this.canvas];
     }
 }
 
+Canvas_Main.prototype.bluePrint=getVEL_thenDeleteElement("temolate_main");
+Canvas_Main.prototype.childCtrlType={
+    ToolBox,
+    CtrlBox
+}
+function main(){
+    var canvasMain=new Canvas_Main();
+    canvasMain.addend(document.body);
+}
 main();
 
 // // 复制图片
