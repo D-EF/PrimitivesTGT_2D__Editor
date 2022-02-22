@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-21 21:50:25
+ * @LastEditTime: 2022-02-22 10:47:58
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -390,12 +390,13 @@ function main(){
     window.ctx=canvas.getContext("2d");
     toolBox.addend(document.getElementById("toolBox-box"));
     ctrlBox.addend(document.getElementById("ctrlBox-box"));
-    var k=[],j=0;
+    var k=[],j=0,f=true;
     canvas.onclick=function(e){
         k[j]=new Vector2(e.offsetX,e.offsetY);
         CtrlCanvas2d.dot(ctx,k[j]);
         ++j;
-        if(j===3){
+        if(j===3&&f){
+            f=false;
             var bz=Math2D.create_bezier_3_by_3_point(k[0],k[1],k[2]);
             var temp=new Bezier_Polygon();
             temp.pushNodes([
@@ -408,17 +409,27 @@ function main(){
                     node:bz.points[3]
                 }
             ]);
-            CtrlCanvas2d.dot(ctx,bz.points[1]);
-            CtrlCanvas2d.dot(ctx,bz.points[2]);
-            CtrlCanvas2d.dot(ctx,e1,2,"#0f0");
-            CtrlCanvas2d.dot(ctx,e2,2,"#0f0");
             
             var temp_tgt=new PrimitiveBezierTGT(temp)
             temp_tgt.fill_Material=new Canvas2d_Material("#0000");
             ctrlBox.rootGroup.addChildren(temp_tgt);
-
-            ctrlBox.renderCanvas();
+            k[0]=k[2];
+            j=1;
         }
+        if(j==3&&!f){
+            var bz=Math2D.create_bezier_3_by_3_point(k[j-3],k[j-2],k[j-1]);
+            var temp=ctrlBox.rootGroup.data[0];
+            var i=temp.data.nodes.length-1;
+            temp.data.nodes[i].hand_after=bz.points[1];
+
+            temp.data.nodes[i+1]={
+                hand_before:bz.points[2],
+                node:bz.points[3]
+            };
+            k[0]=k[2];
+            j=0;
+        }
+        ctrlBox.renderCanvas();
     }
 }
 
