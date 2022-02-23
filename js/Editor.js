@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-22 21:40:44
+ * @LastEditTime: 2022-02-23 16:49:45
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -13,6 +13,7 @@ import {
 import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Rect_Data, Sector_Data, Vector2 } from "../../Math2d.js";
 import { Material, PrimitiveArcTGT, PrimitiveBezierTGT, PrimitiveRectTGT, PrimitiveTGT_Group } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d_Material, Canvas2D_TGT_Renderer, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
+
 
 /**
  * 获取
@@ -26,18 +27,58 @@ function getVEL_thenDeleteElement(id){
 }
 
 
-class ToolBox extends ExCtrl {
+class Canvas_Main extends ExCtrl{
     constructor(data){
         super(data);
-        this.actIndex=0;
+        this.canvas=document.createElement("canvas");
+        this.canvas.className="canvas";
+        this.canvas.width=500;
+        this.canvas.height=500;
+        // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
+        
+        this.addCtrlAction("callback",function(){
+            this.elements["canvas_main"].appendChild(this.canvas)
+        });
     }
-    tabTool(i){
-        this.actIndex=i;
-        this.renderStyle();
+    toolbox_init(){
+        return {list:[
+            {
+                name:"cursor",
+                u:5,
+                v:3,
+            },
+            {
+                name:"ract",
+                u:0,
+                v:5,
+            },
+            {
+                name:"arc",
+                u:1,
+                v:5,
+            },
+            {
+                name:"sector",
+                u:2,
+                v:5,
+            },
+            {
+                name:"polygon",
+                u:3,
+                v:5,
+            },
+            {
+                name:"bezier",
+                u:4,
+                v:5,
+            },
+        ]}
     }
-    
+    ctrlbox_init(){
+        return [{},this.canvas];
+    }
 }
-ToolBox.prototype.bluePrint=getVEL_thenDeleteElement("template_toolBox");
+Canvas_Main.prototype.bluePrint=getVEL_thenDeleteElement("temolate_main");
 
 class CtrlBox extends ExCtrl{
     /**
@@ -76,13 +117,33 @@ class CtrlBox extends ExCtrl{
             rootGroup:this.rootGroup
         };
     }
+    /** 用当前焦点对象刷新 matrix
+     */
+    reRender_matrix(){
+        if(this.focused_tgt){
+            this.callChild("")
+        }
+    }
 }
 CtrlBox.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrlBox");
+
+class ToolBox extends ExCtrl {
+    constructor(data){
+        super(data);
+        this.actIndex=0;
+    }
+    tabTool(i){
+        this.actIndex=i;
+        this.renderStyle();
+    }
+    
+}
+ToolBox.prototype.bluePrint=getVEL_thenDeleteElement("template_toolBox");
 
 class Ctrl_Matrix2x2T extends ExCtrl{
     constructor(data){
         super(data);
-        /**@type {{list:{name:String,u:Number,v:Number}[]}} */
+        /**@type {Matrix2x2T} */
         this.data;
         /**@type {String} 上一个被控制的input的ctrlID */
         this.lastF_ctrlid;
@@ -183,7 +244,6 @@ Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_Matr
 
 class Ctrl_tgtAssets extends ExCtrl{
     /**
-     * 
      * @param {{rootGroup:PrimitiveTGT_Group}} data 
      */
     constructor(data){
@@ -356,59 +416,6 @@ CtrlBox.prototype.childCtrlType={
     Ctrl_tgtAssets:Ctrl_tgtAssets
 }
 
-class Canvas_Main extends ExCtrl{
-    constructor(data){
-        super(data);
-        this.canvas=document.createElement("canvas");
-        this.canvas.className="canvas";
-        this.canvas.width=500;
-        this.canvas.height=500;
-        // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
-        
-        this.addCtrlAction("callback",function(){
-            this.elements["canvas_main"].appendChild(this.canvas)
-        });
-    }
-    toolbox_init(){
-        return {list:[
-            {
-                name:"cursor",
-                u:5,
-                v:3,
-            },
-            {
-                name:"ract",
-                u:0,
-                v:5,
-            },
-            {
-                name:"arc",
-                u:1,
-                v:5,
-            },
-            {
-                name:"sector",
-                u:2,
-                v:5,
-            },
-            {
-                name:"polygon",
-                u:3,
-                v:5,
-            },
-            {
-                name:"bezier",
-                u:4,
-                v:5,
-            },
-        ]}
-    }
-    ctrlbox_init(){
-        return [{},this.canvas];
-    }
-}
-
-Canvas_Main.prototype.bluePrint=getVEL_thenDeleteElement("temolate_main");
 Canvas_Main.prototype.childCtrlType={
     ToolBox,
     CtrlBox
