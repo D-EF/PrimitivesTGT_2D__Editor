@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-23 16:49:45
+ * @LastEditTime: 2022-02-28 18:02:28
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -10,9 +10,9 @@ import {
     DEF_VirtualElementList as VEL,
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
-import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Rect_Data, Sector_Data, Vector2 } from "../../Math2d.js";
-import { Material, PrimitiveArcTGT, PrimitiveBezierTGT, PrimitiveRectTGT, PrimitiveTGT_Group } from "../../PrimitivesTGT_2D.js";
-import { Canvas2d_Material, Canvas2D_TGT_Renderer, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
+import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2 } from "../../Math2d.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group } from "../../PrimitivesTGT_2D.js";
+import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 
 
 /**
@@ -90,8 +90,8 @@ class CtrlBox extends ExCtrl{
         super(data);
         this.canvas=canvas;
         this.ctx=canvas.getContext("2d");
-        this.canvas_renderer=new Canvas2D_TGT_Renderer([],this.ctx);
-        this.rootGroup=new PrimitiveTGT_Group();
+        this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([],this.ctx);
+        this.rootGroup=new PrimitiveTGT__Group();
         this.canvas_renderer.add(this.rootGroup);
     }
     renderTGT_Assets(){
@@ -145,7 +145,7 @@ class Ctrl_Matrix2x2T extends ExCtrl{
         super(data);
         /**@type {Matrix2x2T} */
         this.data;
-        /**@type {String} 上一个被控制的input的ctrlID */
+        /**@type {String} 上一个被控制的input的ctrl_id */
         this.lastF_ctrlid;
         /**@type {Delegate} 重写矩阵时的委托 会获得参数 m (矩阵) */
         this.reset_D=Delegate.create();
@@ -204,7 +204,7 @@ class Ctrl_Matrix2x2T extends ExCtrl{
      */
     focus_input(tgt){
         if(tgt.tagName==="INPUT"){
-            this.lastF_ctrlid=tgt.ctrlID;
+            this.lastF_ctrlid=tgt.ctrl_id;
             tgt.focus();
             tgt.select();
         }
@@ -244,17 +244,17 @@ Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_Matr
 
 class Ctrl_tgtAssets extends ExCtrl{
     /**
-     * @param {{rootGroup:PrimitiveTGT_Group}} data 
+     * @param {{rootGroup:PrimitiveTGT__Group}} data 
      */
     constructor(data){
         super(data);
         /** @type {{ctx:CanvasRenderingContext2D}} */
         this.data;
         console.log(data);
-        this.renderer=new Canvas2D_TGT_Renderer(this.data.ctx);
-        /**@type {PrimitiveTGT_Group} 图元根路径 */
+        this.renderer=new Renderer_PrimitiveTGT__Canvas2D(this.data.ctx);
+        /**@type {PrimitiveTGT__Group} 图元根路径 */
         this.rootGroup=data.rootGroup;
-        /**@type {PrimitiveTGT_Group[]} 遍历渲染时当前项的路径 */
+        /**@type {PrimitiveTGT__Group[]} 遍历渲染时当前项的路径 */
         this.gg=[this.rootGroup.data[0]];
         /**@type {Number[]} 遍历渲染时当前项的路径(下标形式) */
         this.gi=[0];
@@ -323,12 +323,12 @@ class Ctrl_tgtAssets extends ExCtrl{
      * @param {Number} index 渲染到控件中时的下标
      */
     redirect_editTGT(path,index){
-        var ctrlID="isEditingBtn-EX_for-tgt_list-C"+index;
-        console.log(ctrlID);
-        if(this.old_id!==ctrlID){
-            this.elements[ctrlID].classList.add("ctrlBox-tgtAssets-isEditingBtn-editing");
+        var ctrl_id="isEditingBtn-EX_for-tgt_list-C"+index;
+        console.log(ctrl_id);
+        if(this.old_id!==ctrl_id){
+            this.elements[ctrl_id].classList.add("ctrlBox-tgtAssets-isEditingBtn-editing");
             this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-isEditingBtn-editing");
-            this.old_id=ctrlID;
+            this.old_id=ctrl_id;
         }
 
     }
