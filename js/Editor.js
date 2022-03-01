@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-02-28 18:02:28
+ * @LastEditTime: 2022-03-01 20:48:04
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -212,7 +212,7 @@ class Ctrl_Matrix2x2T extends ExCtrl{
     /**使矩阵标准化
      */
     normalize(){
-        this.editing_matrix.normalize();
+        // this.editing_matrix.normalize();
         this.render_editing_matrix();
     }
     /**让input失去焦点
