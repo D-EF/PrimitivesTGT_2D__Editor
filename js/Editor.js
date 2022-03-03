@@ -1,17 +1,18 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-01 20:48:04
+ * @LastEditTime: 2022-03-03 18:00:36
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
 import { stopPE } from "../../../basics/dom_tool.js";
+import { deg } from "../../../basics/math_ex.js";
 import {
     DEF_VirtualElementList as VEL,
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
-import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2 } from "../../Math2d.js";
-import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group } from "../../PrimitivesTGT_2D.js";
+import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 
 
@@ -35,10 +36,10 @@ class Canvas_Main extends ExCtrl{
         this.canvas.width=500;
         this.canvas.height=500;
         // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
-        
         this.addCtrlAction("callback",function(){
             this.elements["canvas_main"].appendChild(this.canvas)
         });
+
     }
     toolbox_init(){
         return {list:[
@@ -93,6 +94,8 @@ class CtrlBox extends ExCtrl{
         this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([],this.ctx);
         this.rootGroup=new PrimitiveTGT__Group();
         this.canvas_renderer.add(this.rootGroup);
+        this.rootGroup.addChildren(new PrimitiveTGT__Polygon(new Data_Arc__Ellipse(100,100,90,123,0,200*deg).create_polygonProxy(30*deg).polygon));
+        this.renderCanvas()
     }
     renderTGT_Assets(){
         this.callChild("_tgtAssets",
