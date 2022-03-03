@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-03 18:00:36
+ * @LastEditTime: 2022-03-03 21:17:43
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -95,6 +95,9 @@ class CtrlBox extends ExCtrl{
         this.rootGroup=new PrimitiveTGT__Group();
         this.canvas_renderer.add(this.rootGroup);
         this.rootGroup.addChildren(new PrimitiveTGT__Polygon(new Data_Arc__Ellipse(100,100,90,123,0,200*deg).create_polygonProxy(30*deg).polygon));
+        var t_arc=new Data_Arc__Ellipse(100,100,100,100,0,200*deg);
+        console.log(t_arc.arc_length_table);
+
         this.renderCanvas()
     }
     renderTGT_Assets(){
