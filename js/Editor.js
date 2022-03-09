@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-04 17:49:40
+ * @LastEditTime: 2022-03-09 21:25:38
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -94,13 +94,11 @@ class CtrlBox extends ExCtrl{
         this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([],this.ctx);
         this.rootGroup=new PrimitiveTGT__Group();
         this.canvas_renderer.add(this.rootGroup);
-        var etemp=new PrimitiveTGT__Polygon(new Data_Arc__Ellipse(100,100,50,100,0,200*deg,80*deg).create_polygonProxy(30*deg).polygon);
+        var t_arc=Data_Arc__Ellipse.create_byEndPointRadiusRotate(new Vector2(100,100),new Vector2(200,200),80,100,0,1,1);
+        var etemp=new PrimitiveTGT__Polygon(t_arc.create_polygonProxy(10*deg).polygon);
+        console.log(t_arc);
         this.rootGroup.addChildren(etemp);
-        var t_arc=new Data_Arc__Ellipse(100,100,50,100,0,200*deg,80*deg);
-        var temp=new PrimitiveTGT__Arc(0,0,50,0,200*deg);
-            temp.transform_matrix=t_arc.transform_matrix;
-            console.log(temp.transform_matrix);
-        // this.rootGroup.addChildren(temp);
+        
         this.renderCanvas();
         console.log(t_arc.arc_length_table);
         CtrlCanvas2d.dot(this.ctx,t_arc.sample(0));
@@ -109,6 +107,7 @@ class CtrlBox extends ExCtrl{
         CtrlCanvas2d.dot(this.ctx,t_arc.sample(0.6));
         CtrlCanvas2d.dot(this.ctx,t_arc.sample(1));
         canvas.onclick=function(e){
+            console.log(e.offsetX,e.offsetY);
             console.log(t_arc.is_inside(e.offsetX,e.offsetY,true));
         }
     }
