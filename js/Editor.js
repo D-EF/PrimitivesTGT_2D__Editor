@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-11 15:39:54
+ * @LastEditTime: 2022-03-15 23:51:03
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -12,7 +12,7 @@ import {
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
 import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
-import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon } from "../../PrimitivesTGT_2D.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 
 
@@ -94,25 +94,15 @@ class CtrlBox extends ExCtrl{
         this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([],this.ctx);
         this.rootGroup=new PrimitiveTGT__Group();
         this.canvas_renderer.add(this.rootGroup);
-        var t_arc=Data_Arc__Ellipse.create_byEndPointRadiusRotate(new Vector2(100,100),new Vector2(200,200),80,100,0,1,0);
-        // var t_arc=Data_Arc__Ellipse.create_byEndPointRadiusRotate(new Vector2(100,200),new Vector2(200,100),80,100,0,1,1);
-        // var t_arc=Data_Arc__Ellipse.create_byEndPointRadiusRotate(new Vector2(200,200),new Vector2(100,100),80,100,0,1,1);
-
-        var etemp=new PrimitiveTGT__Polygon(t_arc.create_polygonProxy(10*deg).polygon);
-        console.log(t_arc);
-        this.rootGroup.addChildren(etemp);
+        // test open
         
+        // var etemp=new PrimitiveTGT__Path("M10 80 Q 52.5 10, 95 80 T 180 80");
+        // var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80");
+        var etemp=new PrimitiveTGT__Path("M10 315 L 110 215 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 109.9 L 315 10");
+        this.rootGroup.addChildren(etemp);
         this.renderCanvas();
-        console.log(t_arc.arc_length_table);
-        CtrlCanvas2d.dot(this.ctx,t_arc.sample(0),2,"#f00");
-        CtrlCanvas2d.dot(this.ctx,t_arc.sample(1),2,"#0f0");
-        var temp_t=0.5;
-        CtrlCanvas2d.dot(this.ctx,t_arc.sample(temp_t),2,"#0f0");
-        CtrlCanvas2d.dot(this.ctx,Vector2.sum(t_arc.get_tangent(temp_t).np(80),t_arc.sample(temp_t)),2,"#0f0");
-        canvas.onclick=function(e){
-            console.log(e.offsetX,e.offsetY);
-            console.log(t_arc.is_inside(e.offsetX,e.offsetY,true));
-        }
+        
+        // test end
     }
     renderTGT_Assets(){
         this.callChild("_tgtAssets",
