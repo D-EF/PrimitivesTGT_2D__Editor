@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-15 23:51:03
+ * @LastEditTime: 2022-03-15 23:58:32
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -101,6 +101,9 @@ class CtrlBox extends ExCtrl{
         var etemp=new PrimitiveTGT__Path("M10 315 L 110 215 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 109.9 L 315 10");
         this.rootGroup.addChildren(etemp);
         this.renderCanvas();
+        canvas.onclick=function(e){
+            console.log(e.offsetX,e.offsetY);
+        }
         
         // test end
     }
