@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-15 23:58:32
+ * @LastEditTime: 2022-03-17 19:12:13
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -98,13 +98,23 @@ class CtrlBox extends ExCtrl{
         
         // var etemp=new PrimitiveTGT__Path("M10 80 Q 52.5 10, 95 80 T 180 80");
         // var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80");
-        var etemp=new PrimitiveTGT__Path("M10 315 L 110 215 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 109.9 L 315 10");
+        var etemp=new PrimitiveTGT__Path("M10 315 C28 126 100 380 110 215 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 109.9 L 315 10");
         this.rootGroup.addChildren(etemp);
         this.renderCanvas();
         canvas.onclick=function(e){
             console.log(e.offsetX,e.offsetY);
         }
         
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.1));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.2));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.3));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.4));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.5));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.6));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.7));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.8));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.9));
+        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(1.0));
         // test end
     }
     renderTGT_Assets(){
