@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-17 19:12:13
+ * @LastEditTime: 2022-03-21 02:54:03
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -98,23 +98,39 @@ class CtrlBox extends ExCtrl{
         
         // var etemp=new PrimitiveTGT__Path("M10 80 Q 52.5 10, 95 80 T 180 80");
         // var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80");
-        var etemp=new PrimitiveTGT__Path("M10 315 C28 126 100 380 110 215 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 109.9 L 315 10");
+        var etemp=new PrimitiveTGT__Path("");
         this.rootGroup.addChildren(etemp);
+        
+        var arc=new Data_Arc(100,100,200,0,230*deg);
+
+        console.log(arc.bezier_curve_proxy);
+
+        // var eetemp=new PrimitiveTGT__Bezier(arc.bezier_curve_proxy);
+        // this.rootGroup.addChildren(eetemp);
+        
         this.renderCanvas();
         canvas.onclick=function(e){
+            console.log(arc.bezier_curve_proxy);
             console.log(e.offsetX,e.offsetY);
         }
-        
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.1));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.2));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.3));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.4));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.5));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.6));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.7));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.8));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.9));
-        CtrlCanvas2d.dot(this.ctx,etemp.data.sample(1.0));
+        var temp=arc.bezier_curve_proxy;
+        console.log(temp[0]);
+        for(var i=temp.length-1;i>=0;--i){
+            CtrlCanvas2d.bezier3(this.ctx,temp[i]);
+        }
+        // CtrlCanvas2d.arc(this.ctx,arc)
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.1));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.2));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.3));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.4));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.5));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.6));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.7));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.8));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.9));
+        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(1.0));
+
+
         // test end
     }
     renderTGT_Assets(){
