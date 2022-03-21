@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-21 02:54:03
+ * @LastEditTime: 2022-03-22 01:28:57
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -101,7 +101,7 @@ class CtrlBox extends ExCtrl{
         var etemp=new PrimitiveTGT__Path("");
         this.rootGroup.addChildren(etemp);
         
-        var arc=new Data_Arc(100,100,200,0,230*deg);
+        var arc=new Data_Arc(100,100,80,0,999*deg);
 
         console.log(arc.bezier_curve_proxy);
 
@@ -114,7 +114,6 @@ class CtrlBox extends ExCtrl{
             console.log(e.offsetX,e.offsetY);
         }
         var temp=arc.bezier_curve_proxy;
-        console.log(temp[0]);
         for(var i=temp.length-1;i>=0;--i){
             CtrlCanvas2d.bezier3(this.ctx,temp[i]);
         }
