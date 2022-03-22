@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-22 01:28:57
+ * @LastEditTime: 2022-03-22 21:09:00
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -97,11 +97,11 @@ class CtrlBox extends ExCtrl{
         // test open
         
         // var etemp=new PrimitiveTGT__Path("M10 80 Q 52.5 10, 95 80 T 180 80");
-        // var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80");
-        var etemp=new PrimitiveTGT__Path("");
+        var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80 q 52.5 10, 95 80 t 20 80 a 150 100 0 0 0 -200 -20z");
+        // var etemp=new PrimitiveTGT__Path("");
         this.rootGroup.addChildren(etemp);
         
-        var arc=new Data_Arc(100,100,80,0,999*deg);
+        var arc=new Data_Arc__Ellipse(100,100,40,80,0,999*deg);
 
         console.log(arc.bezier_curve_proxy);
 
@@ -110,12 +110,13 @@ class CtrlBox extends ExCtrl{
         
         this.renderCanvas();
         canvas.onclick=function(e){
+            console.log(etemp.is_inside(e.offsetX,e.offsetY));
             console.log(arc.bezier_curve_proxy);
             console.log(e.offsetX,e.offsetY);
         }
         var temp=arc.bezier_curve_proxy;
         for(var i=temp.length-1;i>=0;--i){
-            CtrlCanvas2d.bezier3(this.ctx,temp[i]);
+            // CtrlCanvas2d.bezier3(this.ctx,temp[i]);
         }
         // CtrlCanvas2d.arc(this.ctx,arc)
         // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.1));
