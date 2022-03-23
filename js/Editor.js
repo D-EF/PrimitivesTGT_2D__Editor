@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-22 21:09:00
+ * @LastEditTime: 2022-03-23 14:59:02
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -109,12 +109,18 @@ class CtrlBox extends ExCtrl{
         // this.rootGroup.addChildren(eetemp);
         
         this.renderCanvas();
+
         canvas.onclick=function(e){
             console.log(etemp.is_inside(e.offsetX,e.offsetY));
             console.log(arc.bezier_curve_proxy);
             console.log(e.offsetX,e.offsetY);
         }
         var temp=arc.bezier_curve_proxy;
+        
+        this.ctx.rect(etemp.data.get_min().x,etemp.data.get_min().y,
+            etemp.data.get_max().x-etemp.data.get_min().x,
+            etemp.data.get_max().y-etemp.data.get_min().y);
+        this.ctx.stroke();
         for(var i=temp.length-1;i>=0;--i){
             // CtrlCanvas2d.bezier3(this.ctx,temp[i]);
         }
