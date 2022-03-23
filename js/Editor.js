@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-23 14:59:02
+ * @LastEditTime: 2022-03-23 21:02:13
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -97,11 +97,22 @@ class CtrlBox extends ExCtrl{
         // test open
         
         // var etemp=new PrimitiveTGT__Path("M10 80 Q 52.5 10, 95 80 T 180 80");
-        var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80 q 52.5 10, 95 80 t 20 80 a 150 100 0 0 0 -200 -20z");
+        var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80 q 25 -80, 80 0 t 80 0 l 40 180 a 200 200 45 0 0 -320 40z");
+        console.log(window.temparc=etemp.data.get_mathData(etemp.data.command_length-2));
         // var etemp=new PrimitiveTGT__Path("");
+        etemp.fill_Material=new Canvas2d__Material("#0000");
         this.rootGroup.addChildren(etemp);
         
-        var arc=new Data_Arc__Ellipse(100,100,40,80,0,999*deg);
+        // var arc=new Data_Arc__Ellipse(100,100,40,80,0,999*deg);
+        /**
+         * @type {Data_Arc__Ellipse}
+         */
+        var arc=Data_Arc__Ellipse.create_byEndPointRadiusRotate(
+            {x:0,y:0},
+            {x:100,y:100},
+            100,200,45*deg,0,0
+            );
+            window.temparc=arc;
 
         console.log(arc.bezier_curve_proxy);
 
@@ -115,14 +126,22 @@ class CtrlBox extends ExCtrl{
             console.log(arc.bezier_curve_proxy);
             console.log(e.offsetX,e.offsetY);
         }
+        
+        arc.refresh_cache();
         var temp=arc.bezier_curve_proxy;
         
         this.ctx.rect(etemp.data.get_min().x,etemp.data.get_min().y,
             etemp.data.get_max().x-etemp.data.get_min().x,
             etemp.data.get_max().y-etemp.data.get_min().y);
         this.ctx.stroke();
+        
         for(var i=temp.length-1;i>=0;--i){
-            // CtrlCanvas2d.bezier3(this.ctx,temp[i]);
+            CtrlCanvas2d.bezier3(this.ctx,temp[i]);
+        }
+        arc.endAngle=8;
+        temp=arc.bezier_curve_proxy;
+        for(var i=temp.length-1;i>=0;--i){
+            CtrlCanvas2d.bezier3(this.ctx,temp[i]);
         }
         // CtrlCanvas2d.arc(this.ctx,arc)
         // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.1));
