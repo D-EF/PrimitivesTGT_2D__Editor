@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-24 21:15:53
+ * @LastEditTime: 2022-03-24 21:24:39
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -98,7 +98,7 @@ class CtrlBox extends ExCtrl{
         // test open
         
         // var etemp=new PrimitiveTGT__Path("M10 80 Q 52.5 10, 95 80 T 180 80");
-        var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80 q 25 -80, 80 0 t 80 0 l 40 180 a 300 200 30 0 1 -320 -40z");
+        var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80 q 25 -80, 80 0 t 80 0 l 40 240 a 300 180 45 0 0 -320 -40z");
         // var etemp=new PrimitiveTGT__Path("M150 150 a 90 180 60 0 0 120 120z");
         console.log(window.temparc=etemp.data.get_mathData(etemp.data.command_length-2));
         // var etemp=new PrimitiveTGT__Path("");
