@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-24 14:24:59
+ * @LastEditTime: 2022-03-24 21:15:53
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -14,6 +14,7 @@ import {
 import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
 import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
+import { AnimationCtrl } from "../../visual.js";
 
 
 /**
@@ -33,8 +34,8 @@ class Canvas_Main extends ExCtrl{
         super(data);
         this.canvas=document.createElement("canvas");
         this.canvas.className="canvas";
-        this.canvas.width=500;
-        this.canvas.height=500;
+        this.canvas.width   =500;
+        this.canvas.height  =500;
         // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
         this.addCtrlAction("callback",function(){
             this.elements["canvas_main"].appendChild(this.canvas)
@@ -97,7 +98,7 @@ class CtrlBox extends ExCtrl{
         // test open
         
         // var etemp=new PrimitiveTGT__Path("M10 80 Q 52.5 10, 95 80 T 180 80");
-        var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80 q 25 -80, 80 0 t 80 0 l 40 180 a 240 180 45 0 0 -320 -40z");
+        var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80 q 25 -80, 80 0 t 80 0 l 40 180 a 300 200 30 0 1 -320 -40z");
         // var etemp=new PrimitiveTGT__Path("M150 150 a 90 180 60 0 0 120 120z");
         console.log(window.temparc=etemp.data.get_mathData(etemp.data.command_length-2));
         // var etemp=new PrimitiveTGT__Path("");
@@ -115,6 +116,17 @@ class CtrlBox extends ExCtrl{
         //     );
         var arc=window.temparc;
         console.log(arc.bezier_curve_proxy);
+        var ctx=this.ctx,
+            that=this;
+        var ani=new AnimationCtrl(
+            function (t){
+                ctx.clearRect(0,0,1000,1000);
+                that.renderCanvas();
+                CtrlCanvas2d.dot(that.ctx,etemp.data.sample(t));
+                CtrlCanvas2d.dot(that.ctx,etemp.data.sample(t).sum(etemp.data.get_normal(t).np(20)));
+            }
+        )
+        ani.start(3000);
         
         // var eetemp=new PrimitiveTGT__Bezier(arc.bezier_curve_proxy);
         // this.rootGroup.addChildren(eetemp);
