@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-24 21:24:39
+ * @LastEditTime: 2022-03-25 15:47:12
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -16,6 +16,18 @@ import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, 
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../visual.js";
 
+
+// 阻止关闭页面
+function addOnBeforeUnload(e) {
+	var ev = e || event;
+	// ev && (ev.returnValue = '浏览器不会保存你的内容, 你确定要离开?');
+}
+ 
+if(window.attachEvent){
+	window.attachEvent('onbeforeunload', addOnBeforeUnload);
+} else {
+	window.addEventListener('beforeunload', addOnBeforeUnload, false);
+}
 
 /**
  * 获取
@@ -74,6 +86,11 @@ class Canvas_Main extends ExCtrl{
                 u:4,
                 v:5,
             },
+            {
+                name:"path",
+                u:5,
+                v:5,
+            },
         ]}
     }
     ctrlbox_init(){
@@ -95,76 +112,6 @@ class CtrlBox extends ExCtrl{
         this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([],this.ctx);
         this.rootGroup=new PrimitiveTGT__Group();
         this.canvas_renderer.add(this.rootGroup);
-        // test open
-        
-        // var etemp=new PrimitiveTGT__Path("M10 80 Q 52.5 10, 95 80 T 180 80");
-        var etemp=new PrimitiveTGT__Path("M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80 q 25 -80, 80 0 t 80 0 l 40 240 a 300 180 45 0 0 -320 -40z");
-        // var etemp=new PrimitiveTGT__Path("M150 150 a 90 180 60 0 0 120 120z");
-        console.log(window.temparc=etemp.data.get_mathData(etemp.data.command_length-2));
-        // var etemp=new PrimitiveTGT__Path("");
-        etemp.fill_Material=new Canvas2d__Material("#0000");
-        this.rootGroup.addChildren(etemp);
-        
-        // var arc=new Data_Arc__Ellipse(100,100,40,80,0,999*deg);
-        /**
-         * @type {Data_Arc__Ellipse}
-         */
-        // var arc=Data_Arc__Ellipse.create_byEndPointRadiusRotate(
-        //     {x:0,y:0},
-        //     {x:100,y:100},
-        //     100,200,60*deg,0,0
-        //     );
-        var arc=window.temparc;
-        console.log(arc.bezier_curve_proxy);
-        var ctx=this.ctx,
-            that=this;
-        var ani=new AnimationCtrl(
-            function (t){
-                ctx.clearRect(0,0,1000,1000);
-                that.renderCanvas();
-                CtrlCanvas2d.dot(that.ctx,etemp.data.sample(t));
-                CtrlCanvas2d.dot(that.ctx,etemp.data.sample(t).sum(etemp.data.get_normal(t).np(20)));
-            }
-        )
-        ani.start(3000);
-        
-        // var eetemp=new PrimitiveTGT__Bezier(arc.bezier_curve_proxy);
-        // this.rootGroup.addChildren(eetemp);
-        
-        this.renderCanvas();
-        // arc.endAngle=18;
-
-        canvas.onclick=function(e){
-            console.log(etemp.is_inside(e.offsetX,e.offsetY));
-            console.log(arc.bezier_curve_proxy);
-            console.log(e.offsetX,e.offsetY);
-        }
-        
-        arc.refresh_cache();
-        var temp=arc.bezier_curve_proxy;
-        
-        this.ctx.rect(etemp.data.get_min().x,etemp.data.get_min().y,
-            etemp.data.get_max().x-etemp.data.get_min().x,
-            etemp.data.get_max().y-etemp.data.get_min().y);
-        this.ctx.stroke();
-        
-        for(var i=temp.length-1;i>=0;--i){
-            CtrlCanvas2d.bezier3(this.ctx,temp[i]);
-        }
-        // CtrlCanvas2d.arc(this.ctx,arc)
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.1));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.2));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.3));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.4));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.5));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.6));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.7));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.8));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(0.9));
-        // CtrlCanvas2d.dot(this.ctx,etemp.data.sample(1.0));
-
-
-        // test end
     }
     renderTGT_Assets(){
         this.callChild("_tgtAssets",
