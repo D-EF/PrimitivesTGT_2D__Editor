@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-25 15:47:12
+ * @LastEditTime: 2022-03-26 17:17:31
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -11,7 +11,7 @@ import {
     DEF_VirtualElementList as VEL,
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
-import { Bezier_Polygon, Math2D, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
+import { Bezier_Polygon, Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
 import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../visual.js";
@@ -40,20 +40,110 @@ function getVEL_thenDeleteElement(id){
     return rtn;
 }
 
+/**
+ * @param {Matrix2x2T} m 
+ * @returns {String}
+ */
+function matrixToCSS(m){
+    return "matrix("+
+    [
+        m.a,
+        m.b,
+        m.c,
+        m.d,
+        m.e,
+        m.f,
+    ].join(',')
+    +")"
+}
 
 class Canvas_Main extends ExCtrl{
     constructor(data){
         super(data);
+        this._view_martix=new Matrix2x2T();
+        this._view_to_canvas_martix=null;
         this.canvas=document.createElement("canvas");
         this.canvas.className="canvas";
         this.canvas.width   =500;
         this.canvas.height  =500;
+        this.viewCtrl_100Center();
         // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
         this.addCtrlAction("callback",function(){
             this.elements["canvas_main"].appendChild(this.canvas)
         });
+    }
+    /** 最大化填充view并居中画布
+     */
+    viewCtrl_maxCenter(){
+        this.canvas.style.transform=matrixToCSS(this._view_martix);
+    }
+    /** 线性变换并平移至居中位置
+     */
+    viewCtrl_100Center(){
+        this.view_martix=new Matrix2x2T(1,0,0,1,this.canvas.width*-0.5,this.canvas.height*-0.5);
+    }
+    /**@type {Matrix2x2T} */
+    set view_martix(m){
+        this._view_martix.set_Matrix2x2(m);
+        this._view_to_canvas_martix=null;
+        this.canvas.style.transform=matrixToCSS(this._view_martix);
+        return this._view_martix;
+    }
+    get view_martix(){
+        return this._view_martix;
+    }
+    get view_to_canvas_martix(){
+        if(!this._view_to_canvas_martix){
+            this._view_to_canvas_martix=this._view_martix.copy().create_inverse();
+            var tv=Vector2.linearMapping_base(new Vector2(-this.view_martix.e,-this.view_martix.f),this._view_martix);
+            this._view_to_canvas_martix.set_translate(tv.x,tv.y);
+        }
+        return this._view_to_canvas_martix
+    }
+    /** view 的坐标 转换成 canvas 的坐标
+     * @param {Number} x 坐标值
+     * @param {Number} y 坐标值
+     * @returns {Vector2} 返回相对坐标
+     */
+    transform_canvasViewToCanvas(x,y){
+        var _x=x-this.canvas.offsetLeft,
+            _y=y-this.canvas.offsetTop;
+        return new Vector2(_x,_y).linearMapping(this.view_to_canvas_martix,true,true);
+    }
+
+    /** 使用事件对象创建相对于canvas的点
+     * @param {MouseEvent} e 
+     * @returns {Vector2} 
+     */
+    create_canvasPoint(e){
+        if(e.target===this.canvas){
+            return new Vector2(e.offsetX,e.offsetY);
+        }
+        return this.transform_canvasViewToCanvas(e.offsetX,e.offsetY);
+    }
+    /** 
+     * @param {MouseEvent} e 
+     */
+    mousedownHand__canvas_main(e){
+        var c_point=this.create_canvasPoint(e);
+        console.log(c_point);
 
     }
+    /** 
+     * @param {MouseEvent} e 
+     */
+    mouseupHand__canvas_main(e){
+        var c_point=this.transform_canvasViewToCanvas(e.offsetX,e.offsetY);
+        
+    }
+    /**
+     * @param {WheelEvent} e 
+     */
+    wheelHand__canvas_main(e){
+        console.log(e);
+        this.view_martix=Matrix2x2.create.rotate(45*deg);
+    }
+
     toolbox_init(){
         return {list:[
             {
@@ -101,7 +191,6 @@ Canvas_Main.prototype.bluePrint=getVEL_thenDeleteElement("temolate_main");
 
 class CtrlBox extends ExCtrl{
     /**
-     * 
      * @param {*} data 
      * @param {HTMLCanvasElement} canvas 
      */
