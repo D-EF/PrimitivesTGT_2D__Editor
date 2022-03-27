@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-26 17:17:31
+ * @LastEditTime: 2022-03-28 01:50:36
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -140,8 +140,14 @@ class Canvas_Main extends ExCtrl{
      * @param {WheelEvent} e 
      */
     wheelHand__canvas_main(e){
-        console.log(e);
+        if(e.deltaY>0){
+            // 缩小
+        }else{
+            // 放大
+        }
         this.view_martix=Matrix2x2.create.rotate(45*deg);
+        var c_point=this.create_canvasPoint(e);
+        console.log(c_point);
     }
 
     toolbox_init(){
