@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-28 12:01:56
+ * @LastEditTime: 2022-03-28 17:55:15
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -64,24 +64,58 @@ class Canvas_Main extends ExCtrl{
         this._view_to_canvas_martix=null;
         this.canvas=document.createElement("canvas");
         this.canvas.className="canvas";
-        this.canvas.width   =500;
-        this.canvas.height  =500;
+        this.canvas_width   =500;
+        this.canvas_height  =500;
+        /** @type {Data_Rect} */
+        this._canvasBox=null;
+        /** @type {Data_Rect} */
+        this.view_box=null;
 
         /** @type {Vector2} 焦点坐标 */
-        this._focus_Point=new Vector2(0.5*this.canvas.width,0.5*this.canvas.height);
+        this._focus_Point=new Vector2(0.5*this.canvas_width,0.5*this.canvas_height);
         /** @type {Number} 缩放值 */
         this.scale=1;
         /** @type {Number} 旋转值*/
         this.rotate=0;
         /** @type {Matrix2x2T} 增量变换矩阵 */
         this.third_matrix=new Matrix2x2T;
+        /** @type {Boolean} 是否可以在视口中完全呈现所有内容 */
+        this._can_inside=false;
         // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
         this.addCtrlAction("callback",function(){
             this.elements["canvas_main"].appendChild(this.canvas)
         });
     }
     callback(){
+        this.view_box=new Data_Rect(0,0,this.elements.canvas_main.offsetWidth,this.elements.canvas_main.offsetHeight);
         this.viewCtrl_100Center();        
+    }
+    refresh_viewBox(e){
+        this.view_box.w= this.elements.canvas_main.offsetWidth;
+        this.view_box.h= this.elements.canvas_main.offsetHeight;
+        this.view_martix=this.create_viewMartix();
+    }
+    get canvas_width(){
+        return this.canvas.width;
+    }
+    get canvas_height(){
+        return this.canvas.height;
+    }
+    set canvas_width(val){
+        this.canvas.width=val;
+        this._canvasBox=null;
+        return val;
+    }
+    set canvas_height(val){
+        this.canvas.height=val;
+        this._canvasBox=null;
+        return val;
+    }
+    get canvasBox(){
+        if(!this._canvasBox){
+            this._canvasBox=new Data_Rect(0,0,this.canvas_width,this.canvas_height);
+        }
+        return this._canvasBox;
     }
     /** @type {Vector2 ()} */
     set focus_Point(val){
@@ -90,35 +124,33 @@ class Canvas_Main extends ExCtrl{
     }
     get focus_Point(){ return this._focus_Point;}
     get canvas_core(){
-        return new Vector2(this.canvas.width*0.5,this.canvas.height*0.5);
+        return new Vector2(this.canvas_width*0.5,this.canvas_height*0.5);
     }
     
     /** 使用属性计算视图矩阵
      * @return {Matrix2x2T} 返回一个 2x2T 矩阵 
      */
-    calc_viewMartix(){
-        var view=this.elements.canvas_main;
+    create_viewMartix(){
         /** @type {Matrix2x2T} */
-        var baseMatrix=new Matrix2x2T().rotate(this.rotate).scale(this.scale).multiplication(this.third_matrix);
+        var baseMatrix=new Matrix2x2T(this.scale,0,0,this.scale,0,0).rotate(this.rotate).multiplication(this.third_matrix);
         var t=this.focus_Point.copy().linearMapping(baseMatrix);
-        baseMatrix.set_translate(view.offsetWidth*0.5-t.y,view.offsetHeight*0.5-t.x);
+        baseMatrix.set_translate(this.view_box.w*0.5-t.y,this.view_box.h*0.5-t.x);
         return baseMatrix;
     }
-    /** 最大化填充view并居中画布
-     */
-    viewCtrl_maxCenter(){
-        this.canvas.style.transform=matrixToCSS(this._view_martix);
+    create_viewMartix__base(){
+        /** @type {Matrix2x2T} */
+        var baseMatrix=new Matrix2x2T(this.scale,0,0,this.scale,0,0).rotate(this.rotate).multiplication(this.third_matrix);
+        return baseMatrix;
     }
     /** 清除线性变换并平移至居中位置
      */
     viewCtrl_100Center(){
         this.focus_Point={
-            x:0.5*this.canvas.width,
-            y:0.5*this.canvas.height
+            x:0.5*this.canvas_width,
+            y:0.5*this.canvas_height
         }
-        this.scale=1;
         this.rotate=0;
-        this.view_martix=this.calc_viewMartix();
+        this.scale_viewCanvas(1);
     }
     /**@type {Matrix2x2T} */
     set view_martix(m){
@@ -142,9 +174,10 @@ class Canvas_Main extends ExCtrl{
      * @returns {Vector2} 返回相对坐标
      */
     transform_canvasViewToCanvas(x,y){
-        var _x=x,   //-this.canvas.offsetLeft,
-            _y=y;   //-this.canvas.offsetTop;
-        return Vector2.linearMapping_beforeTranslate({x:_x,y:_y},this.view_to_canvas_martix);
+        return Vector2.linearMapping_beforeTranslate({x:x,y:y},this.view_to_canvas_martix);
+    }
+    transform_canvasTocanvasView(x,y){
+        return Vector2.linearMapping_afterTranslate({x:x,y:y},this.view_martix);
     }
 
     /** 使用事件对象创建相对于canvas的点
@@ -163,7 +196,25 @@ class Canvas_Main extends ExCtrl{
     mousedownHand__canvas_main(e){
         var c_point=this.create_canvasPoint(e);
         console.log(c_point);
-
+        if(e.button&&!this._can_inside){
+            // 鼠标中键 拖动画面
+            var t=new Vector2(e.screenX,e.screenY),
+                old_point=this.focus_Point.copy(),
+                that=this;
+            this.rotate=45*deg;
+            document.onmousemove=function(e){
+                var temp_point=new Vector2(t.y-e.screenY,t.x-e.screenX);
+                // console.log(that.transform_canvasViewToCanvas(temp_point.x,temp_point.y));
+                temp_point=Vector2.linearMapping_base(that.view_to_canvas_martix,temp_point);
+                that.focus_Point=old_point.sum(temp_point);
+                that.view_martix=that.create_viewMartix();
+            }
+            document.onmouseup=function(e){
+                document.onmousemove=null;
+                document.onmouseup=null;
+            }
+            this.focus_Point;
+        }
     }
     /** 
      * @param {MouseEvent} e 
@@ -176,15 +227,37 @@ class Canvas_Main extends ExCtrl{
      * @param {WheelEvent} e 
      */
     wheelHand__canvas_main(e){
-        if(e.deltaY>0){
-            // 缩小
-        }else{
-            // 放大
+        if(1||e.altKey){
+            if(e.deltaY>0){
+                // 缩小
+                this.scale_viewCanvas(this.scale-0.1);
+            }else{
+                // 放大
+                this.scale_viewCanvas(this.scale+0.1);
+            }
         }
-        this.rotate=30*deg;
-        this.view_martix=this.calc_viewMartix();
-        var c_point=this.create_canvasPoint(e);
-        console.log(c_point);
+    }
+    scale_viewCanvas(val){
+        var tempM,
+            f=true,
+            temp=this.canvasBox.create_polygonProxy(),
+            view_box=this.view_box,
+            tp;
+        this.scale=val;
+        var old=this.focus_Point.copy();
+        this.focus_Point=this.canvas_core;
+        tempM=this.create_viewMartix();
+        
+        for(var i=temp.nodes.length-1;f&&(i>=0);--i){
+            tp=Vector2.linearMapping_afterTranslate(temp.nodes[i],tempM);
+            f=view_box.is_inside(tp.x,tp.y);
+        }
+        if(!f){
+            this.focus_Point=old;
+            tempM=this.create_viewMartix();
+        }
+        this._can_inside=f;
+        this.view_martix=tempM;
     }
 
     toolbox_init(){
