@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-28 17:55:15
+ * @LastEditTime: 2022-03-28 21:50:24
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -60,17 +60,17 @@ function matrixToCSS(m){
 class Canvas_Main extends ExCtrl{
     constructor(data){
         super(data);
-        this._view_martix=new Matrix2x2T();
-        this._view_to_canvas_martix=null;
         this.canvas=document.createElement("canvas");
         this.canvas.className="canvas";
         this.canvas_width   =500;
         this.canvas_height  =500;
+        this.ctx=this.canvas.getContext("2d");
         /** @type {Data_Rect} */
         this._canvasBox=null;
         /** @type {Data_Rect} */
         this.view_box=null;
 
+        // view
         /** @type {Vector2} 焦点坐标 */
         this._focus_Point=new Vector2(0.5*this.canvas_width,0.5*this.canvas_height);
         /** @type {Number} 缩放值 */
@@ -80,15 +80,69 @@ class Canvas_Main extends ExCtrl{
         /** @type {Matrix2x2T} 增量变换矩阵 */
         this.third_matrix=new Matrix2x2T;
         /** @type {Boolean} 是否可以在视口中完全呈现所有内容 */
-        this._can_inside=false;
-        // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
-        this.addCtrlAction("callback",function(){
-            this.elements["canvas_main"].appendChild(this.canvas)
-        });
+        this._can_inside=true;
+        /** @type {Boolean} 是否常驻可移动视图  */
+        this.can_move_view=false;
+        /** @type {Matrix2x2T} 画布to视口变换矩阵 */
+        this._view_martix=new Matrix2x2T();
+        /** @type {Matrix2x2T} 视口to画布变换矩阵 */
+        this._view_to_canvas_martix=null;
+
+        // tool
+        /** @type {Number} 当前工具的 index */
+        this.tool_index=0;
+        /** @type {{name:String,u:Number,v:Number}[]} 工具列表 */
+        this.tool_list=[
+            {
+                name:"cursor",
+                u:5,
+                v:3,
+            },
+            {
+                name:"ract",
+                u:0,
+                v:5,
+            },
+            {
+                name:"arc",
+                u:1,
+                v:5,
+            },
+            {
+                name:"sector",
+                u:2,
+                v:5,
+            },
+            {
+                name:"polygon",
+                u:3,
+                v:5,
+            },
+            {
+                name:"bezier",
+                u:4,
+                v:5,
+            },
+            {
+                name:"path",
+                u:5,
+                v:5,
+            },
+        ]
+
+        // tgts
+        this.root_group=new PrimitiveTGT__Group();
+        this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([this.root_group],this.ctx);
     }
     callback(){
+        this.elements["canvas_main"].appendChild(this.canvas);
         this.view_box=new Data_Rect(0,0,this.elements.canvas_main.offsetWidth,this.elements.canvas_main.offsetHeight);
-        this.viewCtrl_100Center();        
+        this.viewCtrl_100Center();
+        document.addEventListener("mouseup",function(e){
+            document._view_isMouseing=false;
+            document.removeEventListener("mousemove",document._view_onmousemove);
+            document.removeEventListener("mouseup",document._view_onmouseup);
+        });
     }
     refresh_viewBox(e){
         this.view_box.w= this.elements.canvas_main.offsetWidth;
@@ -150,7 +204,7 @@ class Canvas_Main extends ExCtrl{
             y:0.5*this.canvas_height
         }
         this.rotate=0;
-        this.scale_viewCanvas(1);
+        this.reload_viewCanvasTransform();
     }
     /**@type {Matrix2x2T} */
     set view_martix(m){
@@ -166,7 +220,7 @@ class Canvas_Main extends ExCtrl{
         if(!this._view_to_canvas_martix){
             this._view_to_canvas_martix=this.view_martix.create_inverse();
         }
-        return this._view_to_canvas_martix
+        return this._view_to_canvas_martix;
     }
     /** view 的坐标 转换成 canvas 的坐标
      * @param {Number} x 坐标值
@@ -190,31 +244,64 @@ class Canvas_Main extends ExCtrl{
         }
         return this.transform_canvasViewToCanvas(e.offsetX,e.offsetY);
     }
+    /** 渲染图元内容
+     */
+    renderCanvasTGT(){
+        this.ctx.clearRect(0,0,this.canvasBox.w,this.canvasBox.h);
+        this.canvas_renderer.render_all();
+    }
     /** 
      * @param {MouseEvent} e 
      */
     mousedownHand__canvas_main(e){
-        var c_point=this.create_canvasPoint(e);
-        console.log(c_point);
-        if(e.button&&!this._can_inside){
+        if(document._view_isMouseing){
+            return;
+        }
+        document._view_isMouseing=true;
+        
+        var c_point=this.create_canvasPoint(e),
+        t=new Vector2(e.screenX,e.screenY),
+        that=this;
+
+        if(e.button===1&&(!this._can_inside||this.can_move_view)){
             // 鼠标中键 拖动画面
-            var t=new Vector2(e.screenX,e.screenY),
-                old_point=this.focus_Point.copy(),
-                that=this;
-            this.rotate=45*deg;
-            document.onmousemove=function(e){
+            var old_point=this.focus_Point.copy();
+            document._view_onmousemove=function(e){
                 var temp_point=new Vector2(t.y-e.screenY,t.x-e.screenX);
-                // console.log(that.transform_canvasViewToCanvas(temp_point.x,temp_point.y));
                 temp_point=Vector2.linearMapping_base(that.view_to_canvas_martix,temp_point);
                 that.focus_Point=old_point.sum(temp_point);
                 that.view_martix=that.create_viewMartix();
             }
-            document.onmouseup=function(e){
-                document.onmousemove=null;
-                document.onmouseup=null;
-            }
-            this.focus_Point;
+            this.addMouseEventTodoc()
+            return;
         }
+        if(e.button===0){
+            // 鼠标左键使用工具
+            if(this.tool_index===1){
+                var temptgt=new PrimitiveTGT__Rect(c_point.x,c_point.y,0,0);
+                temptgt.transform_matrix=that.view_to_canvas_martix.copy().set_translate(0,0);
+
+                this.root_group.addChildren(temptgt);
+                this.callChild("ctrlBox",function(){
+                    this.renderTGT_Assets();
+                });
+                var openPoint=this.transform_canvasViewToCanvas(t.x,t.y);
+                // todo
+                document._view_onmousemove=function(e){
+                    
+                    that.transform_canvasViewToCanvas(e.screenX-t.x,e.screenY-t.y)
+                    temptgt.data.w=temp_point.x;
+                    temptgt.data.h=temp_point.y;
+                    that.renderCanvasTGT();
+                }
+            }
+            this.addMouseEventTodoc();
+            return;
+        }
+    }
+    addMouseEventTodoc(){
+        document.addEventListener("mouseup",document._view_onmouseup);
+        document.addEventListener("mousemove",document._view_onmousemove);
     }
     /** 
      * @param {MouseEvent} e 
@@ -227,96 +314,74 @@ class Canvas_Main extends ExCtrl{
      * @param {WheelEvent} e 
      */
     wheelHand__canvas_main(e){
-        if(1||e.altKey){
+        stopPE(e);
+        if(e.ctrlKey){
             if(e.deltaY>0){
                 // 缩小
-                this.scale_viewCanvas(this.scale-0.1);
+                this.scale-=0.1
+                this.reload_viewCanvasTransform();
             }else{
                 // 放大
-                this.scale_viewCanvas(this.scale+0.1);
+                this.scale+=0.1
+                this.reload_viewCanvasTransform();
+            }
+        }
+        if(e.shiftKey){
+            var val=1;
+            if(e.altKey){
+                val*=10;
+            }
+            if(e.deltaY>0){
+                // +旋转
+                this.rotate+=val*deg;
+                this.reload_viewCanvasTransform();
+            }else{
+                // -旋转
+                this.rotate-=val*deg;
+                this.reload_viewCanvasTransform();
             }
         }
     }
-    scale_viewCanvas(val){
+    reload_viewCanvasTransform(){
         var tempM,
             f=true,
             temp=this.canvasBox.create_polygonProxy(),
             view_box=this.view_box,
             tp;
-        this.scale=val;
         var old=this.focus_Point.copy();
         this.focus_Point=this.canvas_core;
         tempM=this.create_viewMartix();
-        
-        for(var i=temp.nodes.length-1;f&&(i>=0);--i){
-            tp=Vector2.linearMapping_afterTranslate(temp.nodes[i],tempM);
-            f=view_box.is_inside(tp.x,tp.y);
+        if(!this.can_move_view){
+            for(var i=temp.nodes.length-1;f&&(i>=0);--i){
+                tp=Vector2.linearMapping_afterTranslate(temp.nodes[i],tempM);
+                f=view_box.is_inside(tp.x,tp.y);
+            }
+            if(!f){
+                this.focus_Point=old;
+                tempM=this.create_viewMartix();
+            }
+            this._can_inside=f;
         }
-        if(!f){
-            this.focus_Point=old;
-            tempM=this.create_viewMartix();
-        }
-        this._can_inside=f;
         this.view_martix=tempM;
     }
 
     toolbox_init(){
-        return {list:[
-            {
-                name:"cursor",
-                u:5,
-                v:3,
-            },
-            {
-                name:"ract",
-                u:0,
-                v:5,
-            },
-            {
-                name:"arc",
-                u:1,
-                v:5,
-            },
-            {
-                name:"sector",
-                u:2,
-                v:5,
-            },
-            {
-                name:"polygon",
-                u:3,
-                v:5,
-            },
-            {
-                name:"bezier",
-                u:4,
-                v:5,
-            },
-            {
-                name:"path",
-                u:5,
-                v:5,
-            },
-        ]}
+        return {list:this.tool_list}
     }
     ctrlbox_init(){
-        return [{},this.canvas];
+        return [this.root_group,this.canvas];
     }
 }
 Canvas_Main.prototype.bluePrint=getVEL_thenDeleteElement("temolate_main");
 
 class CtrlBox extends ExCtrl{
     /**
-     * @param {*} data 
+     * @param {PrimitiveTGT__Group} root_group 
      * @param {HTMLCanvasElement} canvas 
      */
-    constructor(data,canvas){
-        super(data);
-        this.canvas=canvas;
-        this.ctx=canvas.getContext("2d");
-        this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([],this.ctx);
-        this.rootGroup=new PrimitiveTGT__Group();
-        this.canvas_renderer.add(this.rootGroup);
+    constructor(root_group){
+        super();
+        this.root_group=root_group;
     }
     renderTGT_Assets(){
         this.callChild("_tgtAssets",
@@ -328,7 +393,9 @@ class CtrlBox extends ExCtrl{
     /** 渲染 图元内容 到画布上
      */
     renderCanvas(){
-        this.canvas_renderer.render_all();
+        this.callParent(function(){
+            this.canvas_renderer.render_all();
+        })
     }
     /**更改对象隐藏
      * @param {*} path 
@@ -338,7 +405,7 @@ class CtrlBox extends ExCtrl{
     }
     ctrl_tgtAssets_dataFnc(){
         return {
-            rootGroup:this.rootGroup
+            root_group:this.root_group
         };
     }
     /** 用当前焦点对象刷新 matrix
@@ -358,6 +425,9 @@ class ToolBox extends ExCtrl {
     }
     tabTool(i){
         this.actIndex=i;
+        this.callParent(function(){
+            this.tool_index=i;
+        })
         this.renderStyle();
     }
     
@@ -468,7 +538,7 @@ Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_Matr
 
 class Ctrl_tgtAssets extends ExCtrl{
     /**
-     * @param {{rootGroup:PrimitiveTGT__Group}} data 
+     * @param {{root_group:PrimitiveTGT__Group}} data 
      */
     constructor(data){
         super(data);
@@ -477,9 +547,9 @@ class Ctrl_tgtAssets extends ExCtrl{
         console.log(data);
         this.renderer=new Renderer_PrimitiveTGT__Canvas2D(this.data.ctx);
         /**@type {PrimitiveTGT__Group} 图元根路径 */
-        this.rootGroup=data.rootGroup;
+        this.root_group=data.root_group;
         /**@type {PrimitiveTGT__Group[]} 遍历渲染时当前项的路径 */
-        this.gg=[this.rootGroup.data[0]];
+        this.gg=[this.root_group.data[0]];
         /**@type {Number[]} 遍历渲染时当前项的路径(下标形式) */
         this.gi=[0];
         this.depth=0;
@@ -493,15 +563,15 @@ class Ctrl_tgtAssets extends ExCtrl{
         this.gi.length=1;
         this.gi[0]=0;
         this.gg.length=1;
-        this.gg[0]=this.rootGroup.data[0];
+        this.gg[0]=this.root_group.data[0];
         this.di=0;
         this.regress();
-        if(!this.rootGroup.data.length){
+        if(!this.root_group.data.length){
             this.depth=-1;
         }
     }
     getParent(depth){
-        return (depth?this.gg[depth-1]:this.rootGroup);
+        return (depth?this.gg[depth-1]:this.root_group);
     }
     regress(){
         // debugger;
