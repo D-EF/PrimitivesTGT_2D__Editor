@@ -57,10 +57,9 @@ html,body{
 }
 .canvas{
     position:absolute;
-    left:50%;
-    top:50%;
-    /* transform: translate(-50%,-50%); */
-    /* background-image: url(/img/SpritesMap.svg); */
+    left:0;
+    top:0;
+    transform-origin: 0 0;
     background-size:50%;
     background-color: #fff;
 }

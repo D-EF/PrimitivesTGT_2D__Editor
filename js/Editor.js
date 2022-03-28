@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-28 01:50:36
+ * @LastEditTime: 2022-03-28 12:01:56
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -66,21 +66,59 @@ class Canvas_Main extends ExCtrl{
         this.canvas.className="canvas";
         this.canvas.width   =500;
         this.canvas.height  =500;
-        this.viewCtrl_100Center();
+
+        /** @type {Vector2} 焦点坐标 */
+        this._focus_Point=new Vector2(0.5*this.canvas.width,0.5*this.canvas.height);
+        /** @type {Number} 缩放值 */
+        this.scale=1;
+        /** @type {Number} 旋转值*/
+        this.rotate=0;
+        /** @type {Matrix2x2T} 增量变换矩阵 */
+        this.third_matrix=new Matrix2x2T;
         // <canvas ctrl-id="canvas" class="canvas" width="500" height="500"></canvas>
         this.addCtrlAction("callback",function(){
             this.elements["canvas_main"].appendChild(this.canvas)
         });
+    }
+    callback(){
+        this.viewCtrl_100Center();        
+    }
+    /** @type {Vector2 ()} */
+    set focus_Point(val){
+        this._focus_Point.x=val.x;
+        this._focus_Point.y=val.y;
+    }
+    get focus_Point(){ return this._focus_Point;}
+    get canvas_core(){
+        return new Vector2(this.canvas.width*0.5,this.canvas.height*0.5);
+    }
+    
+    /** 使用属性计算视图矩阵
+     * @return {Matrix2x2T} 返回一个 2x2T 矩阵 
+     */
+    calc_viewMartix(){
+        var view=this.elements.canvas_main;
+        /** @type {Matrix2x2T} */
+        var baseMatrix=new Matrix2x2T().rotate(this.rotate).scale(this.scale).multiplication(this.third_matrix);
+        var t=this.focus_Point.copy().linearMapping(baseMatrix);
+        baseMatrix.set_translate(view.offsetWidth*0.5-t.y,view.offsetHeight*0.5-t.x);
+        return baseMatrix;
     }
     /** 最大化填充view并居中画布
      */
     viewCtrl_maxCenter(){
         this.canvas.style.transform=matrixToCSS(this._view_martix);
     }
-    /** 线性变换并平移至居中位置
+    /** 清除线性变换并平移至居中位置
      */
     viewCtrl_100Center(){
-        this.view_martix=new Matrix2x2T(1,0,0,1,this.canvas.width*-0.5,this.canvas.height*-0.5);
+        this.focus_Point={
+            x:0.5*this.canvas.width,
+            y:0.5*this.canvas.height
+        }
+        this.scale=1;
+        this.rotate=0;
+        this.view_martix=this.calc_viewMartix();
     }
     /**@type {Matrix2x2T} */
     set view_martix(m){
@@ -94,9 +132,7 @@ class Canvas_Main extends ExCtrl{
     }
     get view_to_canvas_martix(){
         if(!this._view_to_canvas_martix){
-            this._view_to_canvas_martix=this._view_martix.copy().create_inverse();
-            var tv=Vector2.linearMapping_base(new Vector2(-this.view_martix.e,-this.view_martix.f),this._view_martix);
-            this._view_to_canvas_martix.set_translate(tv.x,tv.y);
+            this._view_to_canvas_martix=this.view_martix.create_inverse();
         }
         return this._view_to_canvas_martix
     }
@@ -106,9 +142,9 @@ class Canvas_Main extends ExCtrl{
      * @returns {Vector2} 返回相对坐标
      */
     transform_canvasViewToCanvas(x,y){
-        var _x=x-this.canvas.offsetLeft,
-            _y=y-this.canvas.offsetTop;
-        return new Vector2(_x,_y).linearMapping(this.view_to_canvas_martix,true,true);
+        var _x=x,   //-this.canvas.offsetLeft,
+            _y=y;   //-this.canvas.offsetTop;
+        return Vector2.linearMapping_beforeTranslate({x:_x,y:_y},this.view_to_canvas_martix);
     }
 
     /** 使用事件对象创建相对于canvas的点
@@ -145,7 +181,8 @@ class Canvas_Main extends ExCtrl{
         }else{
             // 放大
         }
-        this.view_martix=Matrix2x2.create.rotate(45*deg);
+        this.rotate=30*deg;
+        this.view_martix=this.calc_viewMartix();
         var c_point=this.create_canvasPoint(e);
         console.log(c_point);
     }
