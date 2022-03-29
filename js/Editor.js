@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-28 21:50:24
+ * @LastEditTime: 2022-03-29 10:53:19
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -129,6 +129,8 @@ class Canvas_Main extends ExCtrl{
                 v:5,
             },
         ]
+        /** @type {Boolean} 新建对象是否使用视图缩放矩阵 */
+        this.new_tgt_use_scale=false;
 
         // tgts
         this.root_group=new PrimitiveTGT__Group();
@@ -228,10 +230,10 @@ class Canvas_Main extends ExCtrl{
      * @returns {Vector2} 返回相对坐标
      */
     transform_canvasViewToCanvas(x,y){
-        return Vector2.linearMapping_beforeTranslate({x:x,y:y},this.view_to_canvas_martix);
+        return Vector2.linearMapping_beforeTranslate(new Vector2(x,y),this.view_to_canvas_martix);
     }
     transform_canvasTocanvasView(x,y){
-        return Vector2.linearMapping_afterTranslate({x:x,y:y},this.view_martix);
+        return Vector2.linearMapping_afterTranslate(new Vector2(x,y),this.view_martix);
     }
 
     /** 使用事件对象创建相对于canvas的点
@@ -243,6 +245,16 @@ class Canvas_Main extends ExCtrl{
             return new Vector2(e.offsetX,e.offsetY);
         }
         return this.transform_canvasViewToCanvas(e.offsetX,e.offsetY);
+    }
+    /** 使用事件对象得到view坐标
+     * @param {MouseEvent} e view或者canvas上发生的鼠标事件
+     * @returns 
+     */
+    create_viewPoint(e){
+        if(e.target===this.canvas){
+            return this.transform_canvasTocanvasView(e.offsetX,e.offsetY);
+        }
+        return new Vector2(e.offsetX,e.offsetY);
     }
     /** 渲染图元内容
      */
@@ -260,6 +272,7 @@ class Canvas_Main extends ExCtrl{
         document._view_isMouseing=true;
         
         var c_point=this.create_canvasPoint(e),
+        startPoint=this.create_viewPoint(e),
         t=new Vector2(e.screenX,e.screenY),
         that=this;
 
@@ -275,24 +288,44 @@ class Canvas_Main extends ExCtrl{
             this.addMouseEventTodoc()
             return;
         }
-        if(e.button===0){
-            // 鼠标左键使用工具
-            if(this.tool_index===1){
-                var temptgt=new PrimitiveTGT__Rect(c_point.x,c_point.y,0,0);
-                temptgt.transform_matrix=that.view_to_canvas_martix.copy().set_translate(0,0);
+        console.log(c_point);
 
+        // 鼠标左键使用工具
+        if(e.button===0){
+            var tgtM;
+            if(!this.new_tgt_use_scale){
+                // 不使用缩放值 新建一个矩阵
+                tgtM=new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_inverse();
+            }else{
+                tgtM=that.view_to_canvas_martix.copy().set_translate(c_point.x,c_point.y);
+            }
+            tgtM.set_translate(c_point.x,c_point.y);
+
+            if(this.tool_index===1){
+                var temptgt=new PrimitiveTGT__Rect(0,0,0,0);
+
+                
+                
+                temptgt.transform_matrix=tgtM;
                 this.root_group.addChildren(temptgt);
                 this.callChild("ctrlBox",function(){
                     this.renderTGT_Assets();
                 });
                 var openPoint=this.transform_canvasViewToCanvas(t.x,t.y);
-                // todo
                 document._view_onmousemove=function(e){
-                    
-                    that.transform_canvasViewToCanvas(e.screenX-t.x,e.screenY-t.y)
-                    temptgt.data.w=temp_point.x;
-                    temptgt.data.h=temp_point.y;
+                    var movePoint=startPoint.sum(new Vector2(e.screenX-t.x,e.screenY-t.y)),
+                        move_c_point=that.transform_canvasViewToCanvas(movePoint.x,movePoint.y);
+                    // 相对坐标偏移量
+                    // var pt=move_c_point.dif(c_point);
+
+                    var movePoint_canvas=temptgt.worldToLocal(move_c_point);;
+
+                    // console.log(movePoint_canvas);
+                    temptgt.data.w=movePoint_canvas.x;
+                    temptgt.data.h=movePoint_canvas.y;
                     that.renderCanvasTGT();
+                    CtrlCanvas2d.dot(that.ctx,c_point,3,"#0f0");
+                    CtrlCanvas2d.dot(that.ctx,move_c_point,3,"#ff0");
                 }
             }
             this.addMouseEventTodoc();
@@ -325,6 +358,7 @@ class Canvas_Main extends ExCtrl{
                 this.scale+=0.1
                 this.reload_viewCanvasTransform();
             }
+            return;
         }
         if(e.shiftKey){
             var val=1;
@@ -340,6 +374,7 @@ class Canvas_Main extends ExCtrl{
                 this.rotate-=val*deg;
                 this.reload_viewCanvasTransform();
             }
+            return;
         }
     }
     reload_viewCanvasTransform(){
