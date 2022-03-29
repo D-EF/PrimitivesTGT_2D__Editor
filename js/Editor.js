@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-29 10:53:19
+ * @LastEditTime: 2022-03-29 21:03:50
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Delegate } from "../../../basics/Basics.js";
@@ -272,9 +272,9 @@ class Canvas_Main extends ExCtrl{
         document._view_isMouseing=true;
         
         var c_point=this.create_canvasPoint(e),
-        startPoint=this.create_viewPoint(e),
-        t=new Vector2(e.screenX,e.screenY),
-        that=this;
+            startPoint=this.create_viewPoint(e),
+            t=new Vector2(e.screenX,e.screenY),
+            that=this;
 
         if(e.button===1&&(!this._can_inside||this.can_move_view)){
             // 鼠标中键 拖动画面
@@ -297,41 +297,55 @@ class Canvas_Main extends ExCtrl{
                 // 不使用缩放值 新建一个矩阵
                 tgtM=new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_inverse();
             }else{
-                tgtM=that.view_to_canvas_martix.copy().set_translate(c_point.x,c_point.y);
+                tgtM=that.view_to_canvas_martix.copy();
             }
             tgtM.set_translate(c_point.x,c_point.y);
 
+            if(this.tool_index===0){
+                document._view_onmouseup    = null;
+                document._view_onmousemove  = null;
+                return;
+            }
             if(this.tool_index===1){
+                // 矩形
                 var temptgt=new PrimitiveTGT__Rect(0,0,0,0);
 
-                
-                
                 temptgt.transform_matrix=tgtM;
                 this.root_group.addChildren(temptgt);
                 this.callChild("ctrlBox",function(){
                     this.renderTGT_Assets();
                 });
-                var openPoint=this.transform_canvasViewToCanvas(t.x,t.y);
                 document._view_onmousemove=function(e){
                     var movePoint=startPoint.sum(new Vector2(e.screenX-t.x,e.screenY-t.y)),
                         move_c_point=that.transform_canvasViewToCanvas(movePoint.x,movePoint.y);
-                    // 相对坐标偏移量
+                    // 画布相对坐标偏移量
                     // var pt=move_c_point.dif(c_point);
 
-                    var movePoint_canvas=temptgt.worldToLocal(move_c_point);;
+                    // 矩形内部相对坐标偏移量
+                    var movePoint_canvas=temptgt.worldToLocal(move_c_point);
 
-                    // console.log(movePoint_canvas);
                     temptgt.data.w=movePoint_canvas.x;
                     temptgt.data.h=movePoint_canvas.y;
                     that.renderCanvasTGT();
                     CtrlCanvas2d.dot(that.ctx,c_point,3,"#0f0");
                     CtrlCanvas2d.dot(that.ctx,move_c_point,3,"#ff0");
                 }
+                document._view_onmouseup=function(e){
+                    var movePoint=startPoint.sum(new Vector2(e.screenX-t.x,e.screenY-t.y)),
+                        move_c_point=that.transform_canvasViewToCanvas(movePoint.x,movePoint.y);
+                    // 相对坐标偏移量
+                    // var pt=move_c_point.dif(c_point);
+
+                    var movePoint_canvas=temptgt.worldToLocal(move_c_point);
+                    
+                }
             }
             this.addMouseEventTodoc();
             return;
         }
+        // todo
     }
+
     addMouseEventTodoc(){
         document.addEventListener("mouseup",document._view_onmouseup);
         document.addEventListener("mousemove",document._view_onmousemove);
