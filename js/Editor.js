@@ -1,18 +1,18 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-29 21:03:50
+ * @LastEditTime: 2022-03-30 17:35:26
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
-import { Delegate } from "../../../basics/Basics.js";
-import { stopPE } from "../../../basics/dom_tool.js";
+import { CQRS_History, Delegate } from "../../../basics/Basics.js";
+import { addKeyEvent, KeyNotbook, stopPE } from "../../../basics/dom_tool.js";
 import { deg } from "../../../basics/math_ex.js";
 import {
     DEF_VirtualElementList as VEL,
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
 import { Bezier_Polygon, Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
-import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path } from "../../PrimitivesTGT_2D.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, CQRS_Command__PrimitiveTGT } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../visual.js";
 
@@ -99,7 +99,7 @@ class Canvas_Main extends ExCtrl{
                 v:3,
             },
             {
-                name:"ract",
+                name:"rect",
                 u:0,
                 v:5,
             },
@@ -129,12 +129,14 @@ class Canvas_Main extends ExCtrl{
                 v:5,
             },
         ]
+        this._now_point_path=[];
         /** @type {Boolean} 新建对象是否使用视图缩放矩阵 */
         this.new_tgt_use_scale=false;
 
         // tgts
         this.root_group=new PrimitiveTGT__Group();
         this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([this.root_group],this.ctx);
+        this.change_history=new CQRS_History(this.root_group);
     }
     callback(){
         this.elements["canvas_main"].appendChild(this.canvas);
@@ -145,6 +147,13 @@ class Canvas_Main extends ExCtrl{
             document.removeEventListener("mousemove",document._view_onmousemove);
             document.removeEventListener("mouseup",document._view_onmouseup);
         });
+        document.onkeydown=function(e){
+            stopPE(e);
+            console.log("'"+e.keyCode+"':'"+e.code+"'");
+        }
+        addKeyEvent(document,false,true,["ControlLeft","KeyC"],function(){
+            console.log("cnm");
+        })
     }
     refresh_viewBox(e){
         this.view_box.w= this.elements.canvas_main.offsetWidth;
@@ -182,7 +191,9 @@ class Canvas_Main extends ExCtrl{
     get canvas_core(){
         return new Vector2(this.canvas_width*0.5,this.canvas_height*0.5);
     }
-    
+    set_pointPath(val){
+        this._now_point_path=val;
+    }
     /** 使用属性计算视图矩阵
      * @return {Matrix2x2T} 返回一个 2x2T 矩阵 
      */
@@ -208,16 +219,18 @@ class Canvas_Main extends ExCtrl{
         this.rotate=0;
         this.reload_viewCanvasTransform();
     }
-    /**@type {Matrix2x2T} */
+    /**@type {Matrix2x2T} 画布变换到视口的矩阵*/
     set view_martix(m){
         this._view_martix.set_Matrix2x2(m);
         this._view_to_canvas_martix=null;
         this.canvas.style.transform=matrixToCSS(this._view_martix);
         return this._view_martix;
     }
+    /**@type {Matrix2x2T} 画布变换到视口的矩阵*/
     get view_martix(){
         return this._view_martix;
     }
+    /**@type {Matrix2x2T} 视口变换到画布的矩阵*/
     get view_to_canvas_martix(){
         if(!this._view_to_canvas_martix){
             this._view_to_canvas_martix=this.view_martix.create_inverse();
@@ -337,7 +350,7 @@ class Canvas_Main extends ExCtrl{
                     // var pt=move_c_point.dif(c_point);
 
                     var movePoint_canvas=temptgt.worldToLocal(move_c_point);
-                    
+                    that.change_history.add_command(new CQRS_Command__PrimitiveTGT(true,))
                 }
             }
             this.addMouseEventTodoc();
@@ -662,21 +675,33 @@ class Ctrl_tgtAssets extends ExCtrl{
         this.t_depth=d;
     }
     /**重新定向操作对象
-     * @param {Array<Number,String>} path root 对象的子 的 下标形式的路径
+     * @param {(Number|String)[]} path root 对象的子 的 下标形式的路径
      * @param {Number} index 渲染到控件中时的下标
      */
-    redirect_editTGT(path,index){
+    redirect_editTGT(_path,index){
         var ctrl_id="isEditingBtn-EX_for-tgt_list-C"+index;
+        var path=_path;
         console.log(ctrl_id);
         if(this.old_id!==ctrl_id){
             this.elements[ctrl_id].classList.add("ctrlBox-tgtAssets-isEditingBtn-editing");
             this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-isEditingBtn-editing");
             this.old_id=ctrl_id;
+        }else{
+            path=[];
+            this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-isEditingBtn-editing");
+            this.old_id=-1;
         }
-
+        this.callParent(function(){this.callParent(
+            /**
+             * @this {Canvas_Main}
+             */
+            function(){
+                this.set_pointPath(path);
+            })
+        });
     }
     /**隐藏对象 (不渲染)
-     * @param {路径} path 
+     * @param {(Number|String)[]} path 
      */
     change_editTGT_visibility(path){
         this.callParent(
