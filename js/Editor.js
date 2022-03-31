@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-31 15:15:42
+ * @LastEditTime: 2022-03-31 23:51:38
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { CQRS_History, Delegate } from "../../../basics/Basics.js";
@@ -148,10 +148,6 @@ class Canvas_Main extends ExCtrl{
             document.removeEventListener("mousemove",document._view_onmousemove);
             document.removeEventListener("mouseup",document._view_onmouseup);
         });
-        document.onkeydown=function(e){
-            // stopPE(e);
-            console.log("'"+e.keyCode+"':'"+e.code+"'");
-        }
         addKeyEvent(this.parent_node,false,true,["Control","KeyC"],function(){
             if(that._now_point_path.length){
                 // navigator.clipboard.writeText();
