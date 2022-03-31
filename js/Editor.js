@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-03-30 17:35:26
+ * @LastEditTime: 2022-03-31 15:15:42
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { CQRS_History, Delegate } from "../../../basics/Basics.js";
@@ -142,20 +142,34 @@ class Canvas_Main extends ExCtrl{
         this.elements["canvas_main"].appendChild(this.canvas);
         this.view_box=new Data_Rect(0,0,this.elements.canvas_main.offsetWidth,this.elements.canvas_main.offsetHeight);
         this.viewCtrl_100Center();
+        var that=this
         document.addEventListener("mouseup",function(e){
             document._view_isMouseing=false;
             document.removeEventListener("mousemove",document._view_onmousemove);
             document.removeEventListener("mouseup",document._view_onmouseup);
         });
         document.onkeydown=function(e){
-            stopPE(e);
+            // stopPE(e);
             console.log("'"+e.keyCode+"':'"+e.code+"'");
         }
-        addKeyEvent(document,false,true,["ControlLeft","KeyC"],function(){
-            console.log("cnm");
-        })
+        addKeyEvent(this.parent_node,false,true,["Control","KeyC"],function(){
+            if(that._now_point_path.length){
+                // navigator.clipboard.writeText();
+                console.log(that.root_group.get_offspringByPath(that._now_point_path));                
+            }
+        });
+        addKeyEvent(this.parent_node,false,true,["Control","KeyV"],function(){
+            console.log("v");
+        });
+        
+        addKeyEvent(this.parent_node,false,true,["Control","KeyG"],function(){
+            that.root_group.addChildren(
+                new PrimitiveTGT__Group([that.root_group.get_offspringByPath(that._now_point_path)])
+            );
+            that.reRender();
+        });
     }
-    refresh_viewBox(e){
+    refresh_viewBox(){
         this.view_box.w= this.elements.canvas_main.offsetWidth;
         this.view_box.h= this.elements.canvas_main.offsetHeight;
         this.view_martix=this.create_viewMartix();
