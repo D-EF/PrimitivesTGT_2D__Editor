@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-01 21:16:49
+ * @LastEditTime: 2022-04-02 18:09:00
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping } from "../../../basics/Basics.js";
@@ -140,6 +140,7 @@ class Canvas_Main extends ExCtrl{
             this.root_group=new PrimitiveTGT__Group();
             this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([this.root_group],this.ctx);
             this.change_history=new CQRS_History(this.root_group);
+            /**@type {Number[]}  当前焦点的路径 */
             this.focus_tgt_path=[];
             /** @type {Boolean} 新建对象是否使用视图缩放矩阵 */
             this.new_tgt_use_scale=false;
@@ -471,7 +472,7 @@ class Canvas_Main extends ExCtrl{
         }
         ctrlbox_init(){
             var d={};
-            dependencyMapping(d,this,["focus_tgt_path","root_group","canvas"]);
+            dependencyMapping(d,this,["focus_tgt_path","root_group","ctx"]);
             return [d];
         }
     // 子控件初始化函数 end
@@ -480,21 +481,19 @@ Canvas_Main.prototype.bluePrint=getVEL_thenDeleteElement("temolate_main");
 
 class CtrlBox extends ExCtrl{
     /**
-     * @param {PrimitiveTGT__Group} root_group 
-     * @param {HTMLCanvasElement} canvas 
+     * @typedef  {Object} CtrlBox_Data
+     * @property {Number[]} focus_tgt_path  当前焦点的路径
+     * @property {PrimitiveTGT__Group} root_group 根节点
+     * @property {CanvasRenderingContext2D} ctx 渲染上下文
+     */   
+    /**
+     * @param {CtrlBox_Data} data 
      */
-    constructor(data){
+    constructor(data){     
         super(data);
+        /**@type {CtrlBox_Data} */
+        this.data;
     }
-    /**@type {NUmber[]} 路径 */
-    get focus_tgt_path(   ){return this.data.focus_tgt_path}
-    /**@type {NUmber[]} 路径 */
-    set focus_tgt_path(val){this.data.focus_tgt_path=val}
-    
-    /**@type {PrimitiveTGT__Group} 图元tgt的根组 */
-    get root_group(   ){return this.data.root_group}
-    /**@type {PrimitiveTGT__Group} 图元tgt的根组 */
-    set root_group(val){this.data.root_group=val}
     
     renderTGT_Assets(){
         this.callChild("_tgtAssets",
@@ -508,7 +507,7 @@ class CtrlBox extends ExCtrl{
     renderCanvas(){
         this.callParent(function(){
             this.canvas_renderer.render_all();
-        })
+        });
     }
     /**更改对象隐藏
      * @param {*} path 
@@ -518,7 +517,7 @@ class CtrlBox extends ExCtrl{
     }
     tgtAssets_init(){
         var d={};
-        dependencyMapping(d,this.data,["root_group"]);
+        dependencyMapping(d,this.data,["root_group","focus_tgt_path"]);
         return d ;
     }
     /** 用当前焦点对象刷新 matrix
@@ -543,7 +542,6 @@ class ToolBox extends ExCtrl {
         })
         this.renderStyle();
     }
-    
 }
 ToolBox.prototype.bluePrint=getVEL_thenDeleteElement("template_toolBox");
 
@@ -651,31 +649,37 @@ Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_Matr
 
 class Ctrl_tgtAssets extends ExCtrl{
     /**
-     * @param {{root_group:PrimitiveTGT__Group}} data 
+     * @param {CtrlBox_Data} data 
      */
     constructor(data){
         super(data);
-        /** @type {{ctx:CanvasRenderingContext2D}} */
+        /** @type {CtrlBox_Data} */
         this.data;
-        console.log(data);
-        this.renderer=new Renderer_PrimitiveTGT__Canvas2D(this.data.ctx);
-        /**@type {PrimitiveTGT__Group} 图元根路径 */
-        this.root_group=data.root_group;
-        /**@type {PrimitiveTGT__Group[]} 遍历渲染时当前项的路径 */
-        this.gg=[this.root_group.data[0]];
-        /**@type {Number[]} 计算使用的遍历渲染时当前项的路径(下标形式) */
-        this.gi=[0];
-        /**@type {Number[]} 遍历渲染时当前项的路径(下标形式) */
-        this.path=[0];
-        this.depth=0;
-        this.t_depth=0;
-        /**@type {Map<Number,{d:Number,ed:Number}>} 被折叠的 index : 深度  */
-        this.folded_data=new Map();
-        /** @type {Number[]} 当前选中的路径 */
-        this.focus_tgt_path=[];
+
+        // 列表渲染使用的属性 open
+
+            /**@type {PrimitiveTGT__Group[]} 遍历渲染时当前项的路径(tgt) */
+            this.gg=[this.root_group.data[0]];
+            /**@type {Number[]} 遍历渲染时当前项的路径(下标形式) */
+            this.path=[0];
+            
+            /**@type {Number[]} 计算使用的遍历渲染时当前项的路径(下标形式) */
+            this.gi=[0];
+            this.depth=0;
+            this.t_depth=0;
+        
+            /**@type {Map<Number,{d:Number,ed:Number}>} 被折叠的 index : 深度  */
+            this.folded_data=new Map();
+            
+        // 列表渲染使用的属性 end
     }
+    /**@type {PrimitiveTGT__Group} 图元根路径 */
+    get root_group(){return this.data.root_group;}
+    set focus_tgt_path(val){this.data.focus_tgt_path=val;}
+    get focus_tgt_path(   ){return this.data.focus_tgt_path;}
+    /** 列表渲染的初始化动作
+     */
     resetWalker(){
-        console.log(1);
         this.depth=0;
         this.t_depth=0;
         this.gi.length=1;
@@ -693,6 +697,8 @@ class Ctrl_tgtAssets extends ExCtrl{
     getParent(depth){
         return (depth?this.gg[depth-1]:this.root_group);
     }
+    /**列表渲染的回调动作
+     */
     regress(){
         // debugger;
         ++this.di;
@@ -742,7 +748,7 @@ class Ctrl_tgtAssets extends ExCtrl{
     redirect_editTGT(_path,index){
         var ctrl_id="isEditingBtn-EX_for-tgt_list-C"+index;
         var path=_path;
-        console.log(ctrl_id);
+        
         if(this.old_id!==ctrl_id){
             this.elements[ctrl_id].classList.add("ctrlBox-tgtAssets-isEditingBtn-editing");
             this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-isEditingBtn-editing");
@@ -760,6 +766,7 @@ class Ctrl_tgtAssets extends ExCtrl{
             })
         });
     }
+    
     /** 判断路径是否是当前路径
      * @param {Number[]} path 
      * @returns 
@@ -781,9 +788,10 @@ class Ctrl_tgtAssets extends ExCtrl{
 
     }
     /**点击事件操作手柄
-     * @param {Element} element 
+     * @param {MouseEvent} e
      */
-    listClick_hand(element){
+    clickHand_item (e){
+        var element=e.target;
         var temp;
         if(Number(element.getAttribute("child_length"))){
             return this.fold_item(element);
