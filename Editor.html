@@ -1,7 +1,7 @@
 <!--
  * @Date: 2022-02-12 14:43:03
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-02 18:04:39
+ * @LastEditTime: 2022-04-06 05:55:42
  * @FilePath: \def-web\js\visual\Editor\Editor.html
 -->
 <!DOCTYPE html>
@@ -101,9 +101,9 @@
             <ul ctrl-id="tgt_list" class="ctrlBox-tgtAssets_main" ctrl-for="this.resetWalker(); this.depth>=0; this.regress()" pa-click="this.clickHand_item(e)">
                 <li ctrl-id="tgt_item" index="${this.di}" depth="${this.depth}" child_length="${this.gg[this.depth].data.length}" 
                     class="ctrlBox-tgtAssets-item ctrlBox-tgtAssets-item-color_${this.depth%3} unrap_ellipsis"
-                    api-attr-path="console.log(this.path),Array.from(this.path)"
+                    api-attr-path="Array.from(this.path)"
                     ctrl-style="margin-left:${this.depth*12}px;">
-                    <i class="ctrlBox-tgtAssets-isEditingBtn ${this.isFocus(this.path)?'ctrlBox-tgtAssets-isEditingBtn-editing':''}" ctrl-id="isEditingBtn"></i>
+                    <i class="ctrlBox-tgtAssets-focusBtn ${(this.is_focus(this.path)?'ctrlBox-tgtAssets-focusBtn-editing':'')+(this.focusIndex(this.path)?'':'ctrlBox-tgtAssets-focusBtn-selecting')}" ctrl-id="focusBtn"></i>
                     <i class="ctrlBox-tgtAssets-visibility"><i class="iconSpritesSvg iconSpritesSvg-${this.gg[this.depth].visibility?3:4}0"></i>
                     </i>
                     ${this.gg[this.depth].name}

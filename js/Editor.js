@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-02 18:09:00
+ * @LastEditTime: 2022-04-06 06:06:47
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping } from "../../../basics/Basics.js";
@@ -140,6 +140,8 @@ class Canvas_Main extends ExCtrl{
             this.root_group=new PrimitiveTGT__Group();
             this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([this.root_group],this.ctx);
             this.change_history=new CQRS_History(this.root_group);
+            /**@type {Number[][]}  当前选中的路径集合 */
+            this.select_tgt_path=[];
             /**@type {Number[]}  当前焦点的路径 */
             this.focus_tgt_path=[];
             /** @type {Boolean} 新建对象是否使用视图缩放矩阵 */
@@ -197,6 +199,7 @@ class Canvas_Main extends ExCtrl{
                 document.removeEventListener("mousemove",this._view_onmousemove);
                 document.removeEventListener("mouseup",this._view_onmouseup);
             });
+            // todo
             addKeyEvent(this.parent_node,false,true,["Control","KeyC"],function(){
                 if(that.focus_tgt_path.length){
                     // navigator.clipboard.writeText();
@@ -258,7 +261,7 @@ class Canvas_Main extends ExCtrl{
                     // todo 日志化操作
     
                     temptgt.transform_matrix=tgtM;
-                    this.root_group.addChildren(temptgt);
+                    this.root_group.add_children(temptgt);
                     this.callChild("ctrlBox",function(){
                         this.renderTGT_Assets();
                     });
@@ -284,7 +287,7 @@ class Canvas_Main extends ExCtrl{
                         // var pt=move_c_point.dif(c_point);
     
                         var movePoint_canvas=temptgt.worldToLocal(move_c_point);
-                        that.change_history.add_command(new CQRS_Command__PrimitiveTGT(true,))
+                        // that.change_history.add_command(new CQRS_Command__PrimitiveTGT(true,))
                     }
                 }
                 this.addMouseEventTodoc();
@@ -445,9 +448,20 @@ class Canvas_Main extends ExCtrl{
          */
         hyperplasia_group(){
             // todo
-            this.root_group.get_offspringByPath(this.focus_tgt_path).addChildren(
-                new PrimitiveTGT__Group([])
-            );
+            var temp_group=new PrimitiveTGT__Group([]);
+            var i,
+                path,
+                l=this.focus_tgt_path.length;
+            var pGroup=this.root_group.get_parentByPath(this.focus_tgt_path[0]);
+            for(i=0;i<l;++i){
+                path=this.focus_tgt_path[i];
+                if(path.length){
+                    temp_group.add_children(this.root_group.get_offspringByPath(path));
+                    this.root_group.get_parentByPath(path).remove_childrenByIndex(path[path.length-1]);
+                }
+            }
+            this.root_group.get_parentByPath(this.focus_tgt_path[0]).add_children(temp_group);
+            console.log(this.root_group);
             this.reRender();
         }
         /** 渲染图元内容
@@ -456,13 +470,6 @@ class Canvas_Main extends ExCtrl{
             this.ctx.clearRect(0,0,this.canvasBox.w,this.canvasBox.h);
             this.canvas_renderer.render_all();
         }
-        /** 设置当前焦点目标的路径
-         * @param {Number} path 应为组的下标的队列, 用于找到当前焦点的目标
-         */
-        set_pointPath(path){
-            this.focus_tgt_path=path;
-        }
-
 
     // 图元tgt操作相关 end
 
@@ -472,7 +479,7 @@ class Canvas_Main extends ExCtrl{
         }
         ctrlbox_init(){
             var d={};
-            dependencyMapping(d,this,["focus_tgt_path","root_group","ctx"]);
+            dependencyMapping(d,this,["focus_tgt_path","root_group","ctx","select_tgt_path"]);
             return [d];
         }
     // 子控件初始化函数 end
@@ -482,9 +489,10 @@ Canvas_Main.prototype.bluePrint=getVEL_thenDeleteElement("temolate_main");
 class CtrlBox extends ExCtrl{
     /**
      * @typedef  {Object} CtrlBox_Data
-     * @property {Number[]} focus_tgt_path  当前焦点的路径
+     * @property {Number[][]} select_tgt_path  选中的路径集合
      * @property {PrimitiveTGT__Group} root_group 根节点
      * @property {CanvasRenderingContext2D} ctx 渲染上下文
+     * @property {Number[]} focus_tgt_path 当前焦点的路径
      */   
     /**
      * @param {CtrlBox_Data} data 
@@ -517,7 +525,7 @@ class CtrlBox extends ExCtrl{
     }
     tgtAssets_init(){
         var d={};
-        dependencyMapping(d,this.data,["root_group","focus_tgt_path"]);
+        dependencyMapping(d,this.data,["root_group","focus_tgt_path","select_tgt_path"]);
         return d ;
     }
     /** 用当前焦点对象刷新 matrix
@@ -677,6 +685,8 @@ class Ctrl_tgtAssets extends ExCtrl{
     get root_group(){return this.data.root_group;}
     set focus_tgt_path(val){this.data.focus_tgt_path=val;}
     get focus_tgt_path(   ){return this.data.focus_tgt_path;}
+    set select_tgt_path(val){this.data.select_tgt_path=val;}
+    get select_tgt_path(   ){return this.data.select_tgt_path;}
     /** 列表渲染的初始化动作
      */
     resetWalker(){
@@ -718,6 +728,7 @@ class Ctrl_tgtAssets extends ExCtrl{
                 od=d;
                 this.depth=od;
                 if(gg[d].dataType==="Group" && gg[d].data.length){
+                    console.log(gi);
                     // 下潜
                     ++d;
                     gi[d]=0;
@@ -726,6 +737,7 @@ class Ctrl_tgtAssets extends ExCtrl{
                 else{
                     // 上潜
                     gi[d]++;
+                    path.length=d+1;
                     if(this.getParent(d).data[gi[d]]===undefined){
                         break;
                     }
@@ -744,35 +756,44 @@ class Ctrl_tgtAssets extends ExCtrl{
     /**重新定向操作对象
      * @param {(Number|String)[]} path root 对象的子 的 下标形式的路径
      * @param {Number} index 渲染到控件中时的下标
+     * @param {Boolean} f 追加还是修改
      */
-    redirect_editTGT(_path,index){
-        var ctrl_id="isEditingBtn-EX_for-tgt_list-C"+index;
+    redirect_editTGT(_path,index,f){
+        var ctrl_id="focusBtn-EX_for-tgt_list-C"+index;
         var path=_path;
         
         if(this.old_id!==ctrl_id){
-            this.elements[ctrl_id].classList.add("ctrlBox-tgtAssets-isEditingBtn-editing");
-            this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-isEditingBtn-editing");
+            this.elements[ctrl_id].classList.add("ctrlBox-tgtAssets-focusBtn-editing");
+            this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-focusBtn-editing");
+            this.select_tgt_path.unshift(path);
+            if(!f){
+                this.select_tgt_path.length=1;
+            }else{
+                this.elements[this.old_id]&&this.elements[this.old_id].classList.add("ctrlBox-tgtAssets-focusBtn-selecting");
+            }
             this.old_id=ctrl_id;
         }else{
             path=[];
-            this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-isEditingBtn-editing");
+            this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-focusBtn-editing");
             this.old_id=-1;
         }
-        console.log(path);
-        this.focus_tgt_path=Array.from(path);
-        this.callParent(function(){this.callParent(
-            function(){
-                this.set_pointPath(path);
-            })
-        });
+        this.focus_tgt_path=path;
     }
-    
-    /** 判断路径是否是当前路径
-     * @param {Number[]} path 
-     * @returns 
-     */
-    isFocus(path){
+    is_focus(path){
         return arrayEqual(path,this.focus_tgt_path);
+    }
+    /** 路径在被选中的中在哪里
+     * @param {Number[]} path 
+     * @returns {Number} 返回下标+1
+     */
+    focusIndex(path){
+        var i=this.select_tgt_path.length-1;
+        for(;i>=0;--i){
+            if(arrayEqual(path,this.select_tgt_path[0])){
+                return i+1;
+            }
+        }
+        return i+1;
     }
     /**隐藏对象 (不渲染)
      * @param {(Number|String)[]} path 
@@ -785,7 +806,6 @@ class Ctrl_tgtAssets extends ExCtrl{
         function(){
             this.change_editTGT_visibility(path);
         })
-
     }
     /**点击事件操作手柄
      * @param {MouseEvent} e
@@ -796,9 +816,9 @@ class Ctrl_tgtAssets extends ExCtrl{
         if(Number(element.getAttribute("child_length"))){
             return this.fold_item(element);
         }
-        if(Number(element.className.indexOf("ctrlBox-tgtAssets-isEditingBtn")!==-1)){
+        if(Number(element.className.indexOf("ctrlBox-tgtAssets-focusBtn")!==-1)){
             temp=element.parentElement;
-            return this.redirect_editTGT(temp.path,temp.getAttribute("index"));
+            return this.redirect_editTGT(temp.path,temp.getAttribute("index"),e.shiftKey);
         }
         if(Number(element.className.indexOf("ctrlBox-tgtAssets-visibility")!==-1)){
             temp=element.parentElement;
