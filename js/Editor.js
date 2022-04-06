@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-06 06:06:47
+ * @LastEditTime: 2022-04-06 20:46:39
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping } from "../../../basics/Basics.js";
@@ -203,7 +203,7 @@ class Canvas_Main extends ExCtrl{
             addKeyEvent(this.parent_node,false,true,["Control","KeyC"],function(){
                 if(that.focus_tgt_path.length){
                     // navigator.clipboard.writeText();
-                    console.log(that.root_group.get_offspringByPath(that.focus_tgt_path));                
+                    console.log(that.root_group.get_descendantByPath(that.focus_tgt_path));                
                 }
             });
             addKeyEvent(this.parent_node,false,true,["Control","KeyV"],function(){
@@ -241,7 +241,13 @@ class Canvas_Main extends ExCtrl{
     
             // 鼠标左键使用工具
             if(e.button===0){
+                if(this.tool_index===0){
+                    this._view_onmouseup    = null;
+                    this._view_onmousemove  = null;
+                    return;
+                }
                 var tgtM;
+                // todo
                 if(!this.new_tgt_use_scale){
                     // 不使用缩放值 新建一个矩阵
                     tgtM=new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_inverse();
@@ -250,11 +256,6 @@ class Canvas_Main extends ExCtrl{
                 }
                 tgtM.set_translate(c_point.x,c_point.y);
     
-                if(this.tool_index===0){
-                    this._view_onmouseup    = null;
-                    this._view_onmousemove  = null;
-                    return;
-                }
                 if(this.tool_index===1){
                     // 矩形
                     var temptgt=new PrimitiveTGT__Rect(0,0,0,0);
@@ -291,6 +292,7 @@ class Canvas_Main extends ExCtrl{
                     }
                 }
                 this.addMouseEventTodoc();
+                this.tool_index=0;
                 return;
             }
             // todo
@@ -442,7 +444,7 @@ class Canvas_Main extends ExCtrl{
         }
     // 坐标变换相关 end
 
-    // 图元tgt操作相关 open
+    // 图元 tgt 操作相关 open
 
         /** 新建组 如果当前有焦点，将会把焦点的tgt移动到新组内
          */
@@ -451,17 +453,35 @@ class Canvas_Main extends ExCtrl{
             var temp_group=new PrimitiveTGT__Group([]);
             var i,
                 path,
-                l=this.focus_tgt_path.length;
-            var pGroup=this.root_group.get_parentByPath(this.focus_tgt_path[0]);
+                l=this.select_tgt_path.length,
+                temp_p1="-1",
+                temp_p2="";
+            var pGroup=this.root_group.get_parentByPath(this.select_tgt_path[0]);
             for(i=0;i<l;++i){
-                path=this.focus_tgt_path[i];
-                if(path.length){
-                    temp_group.add_children(this.root_group.get_offspringByPath(path));
-                    this.root_group.get_parentByPath(path).remove_childrenByIndex(path[path.length-1]);
+                path=this.select_tgt_path[i];
+                temp_p2=path.join(',');
+                if((path.length)&&(temp_p2.indexOf(temp_p1)===-1)){
+                    temp_group.add_children(this.root_group.get_descendantByPath(path));
+                    temp_p1=temp_p2;
                 }
             }
-            this.root_group.get_parentByPath(this.focus_tgt_path[0]).add_children(temp_group);
-            console.log(this.root_group);
+            temp_p1="-1";
+            temp_p2="";
+            for(i=0;i<l;++i){
+                path=this.select_tgt_path[i];
+                temp_p2=path.join(',');
+                if((path.length)&&(temp_p2.indexOf(temp_p1)===-1)){
+                    this.root_group.remove_descendantByPath(path);
+                    temp_p1=temp_p2;
+                }
+            }
+            if(this.select_tgt_path.length){
+                pGroup.insert(this.select_tgt_path[0][this.select_tgt_path[0].length-1],temp_group);
+                this.select_tgt_path.length=1;
+                this.focus_tgt_path=this.select_tgt_path[0];
+            }else{
+                this.select_tgt_path[0]=this.focus_tgt_path=[pGroup.add_children(temp_group)-1];
+            }
             this.reRender();
         }
         /** 渲染图元内容
@@ -678,6 +698,8 @@ class Ctrl_tgtAssets extends ExCtrl{
         
             /**@type {Map<Number,{d:Number,ed:Number}>} 被折叠的 index : 深度  */
             this.folded_data=new Map();
+            /** @type {String[]} 选中的项的id*/
+            this.select_list=[];
             
         // 列表渲染使用的属性 end
     }
@@ -722,13 +744,13 @@ class Ctrl_tgtAssets extends ExCtrl{
             return;
         }
         gg[d]=this.getParent(d).data[gi[d]];
+        path.length=d+1;
         path[d]=gi[d];
         do{
             if(gg[d]!=undefined){
                 od=d;
                 this.depth=od;
                 if(gg[d].dataType==="Group" && gg[d].data.length){
-                    console.log(gi);
                     // 下潜
                     ++d;
                     gi[d]=0;
@@ -737,7 +759,6 @@ class Ctrl_tgtAssets extends ExCtrl{
                 else{
                     // 上潜
                     gi[d]++;
-                    path.length=d+1;
                     if(this.getParent(d).data[gi[d]]===undefined){
                         break;
                     }
@@ -759,25 +780,49 @@ class Ctrl_tgtAssets extends ExCtrl{
      * @param {Boolean} f 追加还是修改
      */
     redirect_editTGT(_path,index,f){
-        var ctrl_id="focusBtn-EX_for-tgt_list-C"+index;
+        var ctrl_id="tgt_item-EX_for-tgt_list-C"+index;
         var path=_path;
-        
-        if(this.old_id!==ctrl_id){
-            this.elements[ctrl_id].classList.add("ctrlBox-tgtAssets-focusBtn-editing");
-            this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-focusBtn-editing");
-            this.select_tgt_path.unshift(path);
-            if(!f){
-                this.select_tgt_path.length=1;
+        if(f){
+            // 追加
+            if(this.old_id===ctrl_id){
+                // 移除
+                this.focus_tgt_path=[];
+                this.select_list.remove(ctrl_id);
+                this.old_id=-1;
             }else{
-                this.elements[this.old_id]&&this.elements[this.old_id].classList.add("ctrlBox-tgtAssets-focusBtn-selecting");
+                if(this.select_list.indexOf(ctrl_id)===-1){
+                    // 增加
+                    this.select_list.unshift(ctrl_id);
+                    this.focus_tgt_path=path;
+                }else{
+                    // 转移 focus_tgt_path
+                    this.focus_tgt_path=path;
+                }
+                this.old_id=ctrl_id;
             }
-            this.old_id=ctrl_id;
         }else{
-            path=[];
-            this.elements[this.old_id]&&this.elements[this.old_id].classList.remove("ctrlBox-tgtAssets-focusBtn-editing");
-            this.old_id=-1;
+            // 修改
+            if((this.old_id===ctrl_id)&&(this.select_list.length===1)){
+                this.select_list.length=0;
+                this.focus_tgt_path=[];
+                this.old_id=-1;
+            }else{
+                this.select_list.length=1;
+                this.select_list[0]=(ctrl_id);
+                this.focus_tgt_path=path;
+                this.old_id=ctrl_id;
+            }
         }
-        this.focus_tgt_path=path;
+        this.refresh_selectTGT();
+        this.reRender();
+    }
+    refresh_selectTGT(){
+        // es6 排序
+        var arr=Array.from(this.select_list);
+        arr.sort();
+        this.select_tgt_path=arr.map((item)=>{
+            return this.elements[item].path;
+        });
     }
     is_focus(path){
         return arrayEqual(path,this.focus_tgt_path);
@@ -789,7 +834,7 @@ class Ctrl_tgtAssets extends ExCtrl{
     focusIndex(path){
         var i=this.select_tgt_path.length-1;
         for(;i>=0;--i){
-            if(arrayEqual(path,this.select_tgt_path[0])){
+            if(arrayEqual(path,this.select_tgt_path[i])){
                 return i+1;
             }
         }

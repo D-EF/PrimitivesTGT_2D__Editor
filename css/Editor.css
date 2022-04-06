@@ -1,30 +1,40 @@
-html,body{
+html,
+body {
     overflow: hidden;
     width: 100%;
     height: 100%;
 }
+
 @media (max-width:1200px) {
-    html,body{
+
+    html,
+    body {
         font-size: 0.1vw;
     }
 }
+
 @media (min-width:1200px) {
-    html,body{
+
+    html,
+    body {
         font-size: 1.2px;
     }
 }
+
 @media (max-width:800px) {
-    html,body{
+
+    html,
+    body {
         font-size: 0.8px;
     }
 }
 
-:root{
-    --toolbox-width:2.4em;
-    --ctrlbox-width:240rem;
+:root {
+    --toolbox-width: 2.4em;
+    --ctrlbox-width: 240rem;
 }
 
-.tip{
+.tip {
     display: block;
     white-space: nowrap;
     color: var(--colorB1);
@@ -32,65 +42,73 @@ html,body{
     word-spacing: 0;
     transform: scale(0.9);
 }
-.dom-Body-Root{
+
+.dom-Body-Root {
     position: absolute;
     overflow: hidden;
     width: 100%;
     height: 100%;
-    font-size:16px;
+    font-size: 16px;
 }
 
-.canvas-box{
-    position:absolute;
+.canvas-box {
+    position: absolute;
     background-color: #444;
-    left:  var(--toolbox-width);
+    left: var(--toolbox-width);
     right: var(--ctrlbox-width);
-    height:100%;
+    height: 100%;
     width: auto;
 }
-.canvas-view{
+
+.canvas-view {
     width: 100%;
-    height:100%;
+    height: 100%;
 }
-.canvas-view div{
-    pointer-events:none;
+
+.canvas-view div {
+    pointer-events: none;
 }
-.canvas{
-    position:absolute;
-    left:0;
-    top:0;
+
+.canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
     transform-origin: 0 0;
-    background-size:50%;
+    background-size: 50%;
     background-color: #fff;
 }
 
-.toolBox-box{
-    position:absolute;
-    left:0;
+.toolBox-box {
+    position: absolute;
+    left: 0;
     width: var(--toolbox-width);
-    height:100%;
-    border-right:#080 solid 2px;
+    height: 100%;
+    border-right: #080 solid 2px;
     background-color: #020;
 }
-.ctrlBox-box{
-    position:absolute;
+
+.ctrlBox-box {
+    position: absolute;
     right: 0;
     width: var(--ctrlbox-width);
-    height:100%;
-    border-left:#080 solid 2px;
+    height: 100%;
+    border-left: #080 solid 2px;
     background-color: #020;
-    color:var(--colorDT);
+    color: var(--colorDT);
     user-select: none;
 }
-.ctrlBox-box label{
+
+.ctrlBox-box label {
     font-size: 12px;
 }
-.toolBox-item{
+
+.toolBox-item {
     width: 100%;
     height: min-content;
     border: #080 solid 1px;
 }
-.toolBox-item-icon{
+
+.toolBox-item-icon {
     display: block;
     width: 100%;
     padding-top: 100%;
@@ -98,70 +116,77 @@ html,body{
     /* cursor: pointer; */
 }
 
-.toolBox-item:hover .toolBox-item-icon{
+.toolBox-item:hover .toolBox-item-icon {
     background-color: var(--colorC);
 }
 
 
-.ctrlBox-subModuleBox{
-    padding:2px;
-    border:var(--colorD) solid 1px;
-    margin:2px;
+.ctrlBox-subModuleBox {
+    padding: 2px;
+    border: var(--colorD) solid 1px;
+    margin: 2px;
 }
 
-.ctrlBox-Matrix2x2T-main{
+.ctrlBox-Matrix2x2T-main {
     display: grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns: 1fr 1fr;
 }
-.ctrlBox-Matrix2x2T-main span{
+
+.ctrlBox-Matrix2x2T-main span {
     padding-left: 0.2em;
     padding-right: 0.2em;
 
-    pointer-events:none;
+    pointer-events: none;
 }
-.ctrlBox-Matrix2x2T-main input{
+
+.ctrlBox-Matrix2x2T-main input {
     display: block;
-    width:100%;
+    width: 100%;
     position: absolute;
     top: 0;
     left: 0;
-    padding-left:2.5em;
+    padding-left: 2.5em;
     color: var(--colorCT);
     background-color: var(--colorB5);
 }
-.ctrlBox-Matrix2x2T-buttons{
+
+.ctrlBox-Matrix2x2T-buttons {
     /* display: grid; */
     /* grid-template-columns:1fr 1fr; */
     text-align: end;
     word-spacing: -0.5em;
 }
-.ctrlBox-Matrix2x2T-button{
+
+.ctrlBox-Matrix2x2T-button {
     display: inline-block;
     vertical-align: text-bottom;
 }
 
-.ctrlBox-tgtAssets_main{
-    height:244px;
+.ctrlBox-tgtAssets_main {
+    height: 244px;
     overflow-y: scroll;
     overflow-x: hidden;
 }
 
 
-.ctrlBox-tgtAssets-item-color_0{
-    background-color:var(--colorC);
-    color:var(--colorD);
-    border-color:var(--colorE);
+.ctrlBox-tgtAssets-item-color_0 {
+    background-color: var(--colorC);
+    color: var(--colorD);
+    border-color: var(--colorE);
 }
-.ctrlBox-tgtAssets-item-color_1{
-    background-color:var(--colorD);
-    color:var(--colorE);
-    border-color:var(--colorC);
+
+.ctrlBox-tgtAssets-item-color_1 {
+    background-color: var(--colorD);
+    color: var(--colorE);
+    border-color: var(--colorC);
 }
-.ctrlBox-tgtAssets-item-color_2{
-    background-color:var(--colorE);
-    color:var(--colorC);
-    border-color:var(--colorD);
+
+.ctrlBox-tgtAssets-item-color_2 {
+    background-color: var(--colorE);
+    color: var(--colorC);
+    border-color: var(--colorD);
 }
+
 /* 
 .ctrlBox-tgtAssets-item-color_0 .iconSpritesSvg{
     background-color: var(--colorE);
@@ -183,65 +208,77 @@ html,body{
 } */
 
 
-.ctrlBox-tgtAssets-item{
+.ctrlBox-tgtAssets-item {
     line-height: 1.25em;
     height: 1.25em;
     width: auto;
-    padding-left:2.2em;
+    padding-left: 2.2em;
 }
-.ctrlBox-tgtAssets-focusBtn,.ctrlBox-tgtAssets-focusBtn::before{
+
+.ctrlBox-tgtAssets-focusBtn,
+.ctrlBox-tgtAssets-focusBtn::before {
     display: block;
-    position:absolute;
+    position: absolute;
     left: 0.3em;
-    top:50%;
-    width:0.8em;
-    height:0.8em;
-    border:#000 0.08em solid; 
+    top: 50%;
+    width: 0.8em;
+    height: 0.8em;
+    border: #000 0.08em solid;
     border-radius: 50%;
     background-color: var(--colorA3);
     transform: translateY(-50%);
 }
 
-.ctrlBox-tgtAssets-focusBtn::before,.ctrlBox-tgtAssets-focusBtn-selecting::before{
-    width:  80%;
+.ctrlBox-tgtAssets-focusBtn::before,
+.ctrlBox-tgtAssets-focusBtn-selecting::before {
+    width: 80%;
     height: 80%;
-    left:50%;
-    top:50%;
-    transform: translate(-50%,-50%);
-    border-radius: 0%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     background-color: #888;
     border-style: none;
     border-width: 0;
 }
-.ctrlBox-tgtAssets-focusBtn-selecting::before{
-    background-color:#fff;
+
+.ctrlBox-tgtAssets-focusBtn-selecting::before {
+    background-color: #dfd;
+    border-radius: 50%;
 }
-.ctrlBox-tgtAssets-focusBtn-editing::before{
-    background-color:#fff;
-}
-.ctrlBox-tgtAssets-focusBtn-editing.ctrlBox-tgtAssets-focusBtn,.ctrlBox-tgtAssets-focusBtn-selecting.ctrlBox-tgtAssets-focusBtn{
+
+.ctrlBox-tgtAssets-focusBtn-editing::before {
+    background-color: #fff;
     border-radius: 0%;
 }
-.ctrlBox-tgtAssets-focusBtn-editing.ctrlBox-tgtAssets-focusBtn::before{
-    content:"";
+
+.ctrlBox-tgtAssets-focusBtn-editing.ctrlBox-tgtAssets-focusBtn,
+.ctrlBox-tgtAssets-focusBtn-selecting.ctrlBox-tgtAssets-focusBtn {
+    border-radius: 0%;
 }
-.ctrlBox-tgtAssets-visibility{
+
+.ctrlBox-tgtAssets-focusBtn-editing.ctrlBox-tgtAssets-focusBtn::before,
+.ctrlBox-tgtAssets-focusBtn-selecting.ctrlBox-tgtAssets-focusBtn::before {
+    content: "";
+}
+
+.ctrlBox-tgtAssets-visibility {
     position: absolute;
     left: 1.3em;
-    width:0.8em;
-    height:0.8em;
-    top:50%;
+    width: 0.8em;
+    height: 0.8em;
+    top: 50%;
     transform: translateY(-50%);
     background-color: #000;
 }
 
-.ctrlBox-tgtAssets-visibility>.iconSpritesSvg{
+.ctrlBox-tgtAssets-visibility>.iconSpritesSvg {
     position: absolute;
-    width:  100%;
+    width: 100%;
     height: 100%;
-    pointer-events:none;
+    pointer-events: none;
     background-color: #fff;
 }
+
 .useKeyEvent-Box {
     position: absolute;
     width: 100%;
