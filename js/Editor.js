@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-06 20:46:39
+ * @LastEditTime: 2022-04-07 20:25:00
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping } from "../../../basics/Basics.js";
@@ -193,11 +193,12 @@ class Canvas_Main extends ExCtrl{
             this.elements["canvas_main"].appendChild(this.canvas);
             this.view_box=new Data_Rect(0,0,this.elements.canvas_main.offsetWidth,this.elements.canvas_main.offsetHeight);
             this.viewCtrl_100Center();
-            var that=this
+            var that=this;
             document.addEventListener("mouseup",function(e){
                 document._view_isMouseing=false;
-                document.removeEventListener("mousemove",this._view_onmousemove);
-                document.removeEventListener("mouseup",this._view_onmouseup);
+                console.log(1);
+                document.removeEventListener("mousemove",that._view_onmousemove);
+                document.removeEventListener("mouseup",that._view_onmouseup);
             });
             // todo
             addKeyEvent(this.parent_node,false,true,["Control","KeyC"],function(){
@@ -210,8 +211,7 @@ class Canvas_Main extends ExCtrl{
                 console.log("v");
             });
         }
-        /** 
-         * 绘制区域鼠标按下事件
+        /** 绘制区域鼠标按下事件
          * @param {MouseEvent} e 
          */
         mousedownHand__canvas_main(e){
@@ -364,7 +364,7 @@ class Canvas_Main extends ExCtrl{
             this.focus_Point={
                 x:0.5*this.canvas_width,
                 y:0.5*this.canvas_height
-            }
+            };
             this.rotate=0;
             this.reload_viewCanvasTransform();
         }
@@ -445,7 +445,17 @@ class Canvas_Main extends ExCtrl{
     // 坐标变换相关 end
 
     // 图元 tgt 操作相关 open
-
+        /** 重命名当前焦点的tgt
+         */
+        rename(){
+            if(this.focus_tgt_path&&this.focus_tgt_path.length){   
+                var tgt=this.root_group.get_descendantByPath(this.focus_tgt_path);
+                tgt.name=window.prompt("重命名",tgt.name);
+                this.callChild("ctrlBox",function(){
+                    this.renderTGT_Assets();
+                })                
+            }
+        }
         /** 新建组 如果当前有焦点，将会把焦点的tgt移动到新组内
          */
         hyperplasia_group(){
@@ -467,7 +477,7 @@ class Canvas_Main extends ExCtrl{
             }
             temp_p1="-1";
             temp_p2="";
-            for(i=0;i<l;++i){
+            for(i=l-1;i>=0;--i){
                 path=this.select_tgt_path[i];
                 temp_p2=path.join(',');
                 if((path.length)&&(temp_p2.indexOf(temp_p1)===-1)){
