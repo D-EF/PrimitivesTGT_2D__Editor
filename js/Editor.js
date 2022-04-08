@@ -1,10 +1,10 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-07 20:25:00
+ * @LastEditTime: 2022-04-08 21:38:42
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
-import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping } from "../../../basics/Basics.js";
+import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
 import { addKeyEvent, KeyNotbook, stopPE } from "../../../basics/dom_tool.js";
 import { deg } from "../../../basics/math_ex.js";
 import {
@@ -196,7 +196,6 @@ class Canvas_Main extends ExCtrl{
             var that=this;
             document.addEventListener("mouseup",function(e){
                 document._view_isMouseing=false;
-                console.log(1);
                 document.removeEventListener("mousemove",that._view_onmousemove);
                 document.removeEventListener("mouseup",that._view_onmouseup);
             });
@@ -246,23 +245,44 @@ class Canvas_Main extends ExCtrl{
                     this._view_onmousemove  = null;
                     return;
                 }
-                var tgtM;
+                var tgtM,
+                    p=c_point;
+                var p_tgt=this.root_group.get_parentByPath(this.focus_tgt_path),
+                    temp_p_tgt,
+                    focus_is_group=false,
+                    path_last_index=this.focus_tgt_path.get_lastItem();
+                if((temp_p_tgt=p_tgt.data[path_last_index])&&temp_p_tgt.dataType==="Group"){
+                    p_tgt=temp_p_tgt;
+                    focus_is_group=true;
+                }if(!temp_p_tgt){
+                    focus_is_group=true;
+                }
+
+                tgtM=this.root_group.get_descendantTransformMatrix__i(this.focus_tgt_path);
+                p.linearMapping(tgtM);
                 // todo
                 if(!this.new_tgt_use_scale){
                     // 不使用缩放值 新建一个矩阵
-                    tgtM=new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_inverse();
+                    tgtM.multiplication_before(new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_inverse());
                 }else{
-                    tgtM=that.view_to_canvas_martix.copy();
+                    tgtM.multiplication_before(that.view_to_canvas_martix.copy());
                 }
-                tgtM.set_translate(c_point.x,c_point.y);
+
     
                 if(this.tool_index===1){
                     // 矩形
                     var temptgt=new PrimitiveTGT__Rect(0,0,0,0);
                     // todo 日志化操作
-    
                     temptgt.transform_matrix=tgtM;
-                    this.root_group.add_children(temptgt);
+                    
+                    console.log(this.root_group.get_descendantTransformMatrix__i(this.focus_tgt_path,tgtM));
+                    if(focus_is_group){
+                        this.focus_tgt_path.push(p_tgt.add_children(temptgt)-1);
+                    }else{
+                        p_tgt.insert(path_last_index+1,temptgt)
+                        this.focus_tgt_path.set_lastItem(path_last_index+1);
+                    }
+                    console.log(this.focus_tgt_path);
                     this.callChild("ctrlBox",function(){
                         this.renderTGT_Assets();
                     });
@@ -461,6 +481,8 @@ class Canvas_Main extends ExCtrl{
         hyperplasia_group(){
             // todo
             var temp_group=new PrimitiveTGT__Group([]);
+            // test
+            temp_group.transform_matrix=Matrix2x2T.create.rotate(30*deg);
             var i,
                 path,
                 l=this.select_tgt_path.length,
@@ -693,19 +715,8 @@ class Ctrl_tgtAssets extends ExCtrl{
         super(data);
         /** @type {CtrlBox_Data} */
         this.data;
-
+        this.group_iterator=new Iterator__Tree(this.data.root_group,"data");
         // 列表渲染使用的属性 open
-
-            /**@type {PrimitiveTGT__Group[]} 遍历渲染时当前项的路径(tgt) */
-            this.gg=[this.root_group.data[0]];
-            /**@type {Number[]} 遍历渲染时当前项的路径(下标形式) */
-            this.path=[0];
-            
-            /**@type {Number[]} 计算使用的遍历渲染时当前项的路径(下标形式) */
-            this.gi=[0];
-            this.depth=0;
-            this.t_depth=0;
-        
             /**@type {Map<Number,{d:Number,ed:Number}>} 被折叠的 index : 深度  */
             this.folded_data=new Map();
             /** @type {String[]} 选中的项的id*/
@@ -719,71 +730,6 @@ class Ctrl_tgtAssets extends ExCtrl{
     get focus_tgt_path(   ){return this.data.focus_tgt_path;}
     set select_tgt_path(val){this.data.select_tgt_path=val;}
     get select_tgt_path(   ){return this.data.select_tgt_path;}
-    /** 列表渲染的初始化动作
-     */
-    resetWalker(){
-        this.depth=0;
-        this.t_depth=0;
-        this.gi.length=1;
-        this.gi[0]=0;
-        this.path.length=1
-        this.path[0]=0;
-        this.gg.length=1;
-        this.gg[0]=this.root_group.data[0];
-        this.di=0;
-        this.regress();
-        if(!this.root_group.data.length){
-            this.depth=-1;
-        }
-    }
-    getParent(depth){
-        return (depth?this.gg[depth-1]:this.root_group);
-    }
-    /**列表渲染的回调动作
-     */
-    regress(){
-        // debugger;
-        ++this.di;
-        var gg=this.gg,
-        path=this.path,
-        gi=this.gi,
-        d=this.t_depth,
-        od=this.depth;
-        if(d<0){
-            this.depth=d;
-            return;
-        }
-        gg[d]=this.getParent(d).data[gi[d]];
-        path.length=d+1;
-        path[d]=gi[d];
-        do{
-            if(gg[d]!=undefined){
-                od=d;
-                this.depth=od;
-                if(gg[d].dataType==="Group" && gg[d].data.length){
-                    // 下潜
-                    ++d;
-                    gi[d]=0;
-                    gg[d]=this.getParent(d).data[gi[d]];
-                }
-                else{
-                    // 上潜
-                    gi[d]++;
-                    if(this.getParent(d).data[gi[d]]===undefined){
-                        break;
-                    }
-                }
-                this.t_depth=d;
-                return;
-            }
-        }while(0);
-        do{
-            --d;
-            ++gi[d];
-        }while(d>=0&&((gg[d]=this.getParent(d).data[gi[d]])===undefined));
-        // this.depth=od;
-        this.t_depth=d;
-    }
     /**重新定向操作对象
      * @param {(Number|String)[]} path root 对象的子 的 下标形式的路径
      * @param {Number} index 渲染到控件中时的下标
@@ -794,11 +740,11 @@ class Ctrl_tgtAssets extends ExCtrl{
         var path=_path;
         if(f){
             // 追加
-            if(this.old_id===ctrl_id){
+            if(this.old_index===index){
                 // 移除
                 this.focus_tgt_path=[];
                 this.select_list.remove(ctrl_id);
-                this.old_id=-1;
+                this.old_index=-1;
             }else{
                 if(this.select_list.indexOf(ctrl_id)===-1){
                     // 增加
@@ -808,19 +754,19 @@ class Ctrl_tgtAssets extends ExCtrl{
                     // 转移 focus_tgt_path
                     this.focus_tgt_path=path;
                 }
-                this.old_id=ctrl_id;
+                this.old_index=index;
             }
         }else{
             // 修改
-            if((this.old_id===ctrl_id)&&(this.select_list.length===1)){
+            if((this.old_index===index)&&(this.select_tgt_path.length===1)){
                 this.select_list.length=0;
                 this.focus_tgt_path=[];
-                this.old_id=-1;
+                this.old_index=-1;
             }else{
                 this.select_list.length=1;
                 this.select_list[0]=(ctrl_id);
                 this.focus_tgt_path=path;
-                this.old_id=ctrl_id;
+                this.old_index=index;
             }
         }
         this.refresh_selectTGT();
@@ -873,17 +819,17 @@ class Ctrl_tgtAssets extends ExCtrl{
         }
         if(Number(element.className.indexOf("ctrlBox-tgtAssets-focusBtn")!==-1)){
             temp=element.parentElement;
-            return this.redirect_editTGT(temp.path,temp.getAttribute("index"),e.shiftKey);
+            return this.redirect_editTGT(temp.path,Number(temp.getAttribute("index")),e.shiftKey);
         }
         if(Number(element.className.indexOf("ctrlBox-tgtAssets-visibility")!==-1)){
             temp=element.parentElement;
             var iconElement=element.firstElementChild;
             if(iconElement.className==="iconSpritesSvg iconSpritesSvg-40"){
                 iconElement.className="iconSpritesSvg iconSpritesSvg-30"
-                return this.change_editTGT_visibility(temp.path,temp.getAttribute("index"),false);
+                return this.change_editTGT_visibility(temp.path,Number(temp.getAttribute("index")),false);
             }else{
                 iconElement.className="iconSpritesSvg iconSpritesSvg-40"
-                return this.change_editTGT_visibility(temp.path,temp.getAttribute("index"),true);
+                return this.change_editTGT_visibility(temp.path,Number(temp.getAttribute("index")),true);
             }
         }
     }
@@ -920,7 +866,7 @@ class Ctrl_tgtAssets extends ExCtrl{
             i=data[0];
             ed=data[1].ed;
             console.log(data);
-            folded_CSS_Selects.unshift(',.CtrlLib-'+this.ctrlLibID+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")");
+            folded_CSS_Selects.unshift(',.CtrlLib-'+this.c__ctrl_lib_id+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")");
         }
         return ".cnm"+folded_CSS_Selects.join('');
     }

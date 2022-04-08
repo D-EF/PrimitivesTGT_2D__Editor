@@ -1,7 +1,7 @@
 <!--
  * @Date: 2022-02-12 14:43:03
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-07 20:18:17
+ * @LastEditTime: 2022-04-08 19:38:31
  * @FilePath: \def-web\js\visual\Editor\Editor.html
 -->
 <!DOCTYPE html>
@@ -99,15 +99,15 @@
             }
         </ctrlstyle>
         <div>
-            <ul ctrl-id="tgt_list" class="ctrlBox-tgtAssets_main" ctrl-for="this.resetWalker(); this.depth>=0; this.regress()" pa-click="this.clickHand_item(e)">
-                <li ctrl-id="tgt_item" index="${this.di}" depth="${this.depth}" child_length="${this.gg[this.depth].data.length}" 
-                    class="ctrlBox-tgtAssets-item ctrlBox-tgtAssets-item-color_${this.depth%3} unrap_ellipsis"
-                    api-attr-path="Array.from(this.path)"
-                    ctrl-style="margin-left:${this.depth*12}px;">
-                    <i class="ctrlBox-tgtAssets-focusBtn ${(this.is_focus(this.path)?'ctrlBox-tgtAssets-focusBtn-editing':'')+' '+(this.focusIndex(this.path)?'ctrlBox-tgtAssets-focusBtn-selecting':'')}" ctrl-id="focusBtn"></i>
-                    <i class="ctrlBox-tgtAssets-visibility"><i class="iconSpritesSvg iconSpritesSvg-${this.gg[this.depth].visibility?3:4}0"></i>
+            <ul ctrl-id="tgt_list" class="ctrlBox-tgtAssets_main" ctrl-for="this.group_iterator.init();this.group_iterator.judge_isEnd();this.group_iterator.next()" pa-click="this.clickHand_item(e)">
+                <li ctrl-id="tgt_item" index="${this.group_iterator.get_now__di()}" depth="${this.group_iterator.get_now__depth()}" child_length="${this.group_iterator.get_now().data.length}" 
+                    class="ctrlBox-tgtAssets-item ctrlBox-tgtAssets-item-color_${this.group_iterator.get_now__depth()%3} unrap_ellipsis"
+                    api-attr-path="Array.from(this.group_iterator.get_now__path())"
+                    ctrl-style="margin-left:${this.group_iterator.get_now__depth()*12}px;">
+                    <i class="ctrlBox-tgtAssets-focusBtn ${(this.is_focus(this.group_iterator.get_now__path())?((this.old_index=this.group_iterator.get_now__di()),'ctrlBox-tgtAssets-focusBtn-editing'):'')+' '+(this.focusIndex(this.group_iterator.get_now__path())?'ctrlBox-tgtAssets-focusBtn-selecting':'')}" ctrl-id="focusBtn"></i>
+                    <i class="ctrlBox-tgtAssets-visibility"><i class="iconSpritesSvg iconSpritesSvg-${this.group_iterator.get_now().visibility?3:4}0"></i>
                     </i>
-                    ${this.gg[this.depth].name}
+                    ${this.group_iterator.get_now().name}
                 </li>
             </ul>
         </div>
