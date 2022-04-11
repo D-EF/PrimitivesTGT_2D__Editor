@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-08 21:38:42
+ * @LastEditTime: 2022-04-11 18:00:28
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -191,6 +191,7 @@ class Canvas_Main extends ExCtrl{
     //控件动作 open
         callback(){
             this.elements["canvas_main"].appendChild(this.canvas);
+            this.elements["root_hand"].focus();
             this.view_box=new Data_Rect(0,0,this.elements.canvas_main.offsetWidth,this.elements.canvas_main.offsetHeight);
             this.viewCtrl_100Center();
             var that=this;
@@ -245,29 +246,14 @@ class Canvas_Main extends ExCtrl{
                     this._view_onmousemove  = null;
                     return;
                 }
-                var tgtM,
-                    p=c_point;
-                var p_tgt=this.root_group.get_parentByPath(this.focus_tgt_path),
-                    temp_p_tgt,
-                    focus_is_group=false,
-                    path_last_index=this.focus_tgt_path.get_lastItem();
-                if((temp_p_tgt=p_tgt.data[path_last_index])&&temp_p_tgt.dataType==="Group"){
-                    p_tgt=temp_p_tgt;
-                    focus_is_group=true;
-                }if(!temp_p_tgt){
-                    focus_is_group=true;
-                }
-
+                var tgtM;
                 tgtM=this.root_group.get_descendantTransformMatrix__i(this.focus_tgt_path);
-                p.linearMapping(tgtM);
-                // todo
                 if(!this.new_tgt_use_scale){
                     // 不使用缩放值 新建一个矩阵
                     tgtM.multiplication_before(new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_inverse());
                 }else{
                     tgtM.multiplication_before(that.view_to_canvas_martix.copy());
                 }
-
     
                 if(this.tool_index===1){
                     // 矩形
@@ -275,17 +261,16 @@ class Canvas_Main extends ExCtrl{
                     // todo 日志化操作
                     temptgt.transform_matrix=tgtM;
                     
-                    console.log(this.root_group.get_descendantTransformMatrix__i(this.focus_tgt_path,tgtM));
-                    if(focus_is_group){
-                        this.focus_tgt_path.push(p_tgt.add_children(temptgt)-1);
-                    }else{
-                        p_tgt.insert(path_last_index+1,temptgt)
-                        this.focus_tgt_path.set_lastItem(path_last_index+1);
-                    }
-                    console.log(this.focus_tgt_path);
+                    var newpath=this.root_group.insert_byPath(this.focus_tgt_path,temptgt);
+                    var temp_point=this.root_group.worldToDescendant(newpath,c_point);
+                    temptgt.data.x=temp_point.x;
+                    temptgt.data.y=temp_point.y;
+                    this.select_tgt_path.length=1;
+                    this.select_tgt_path[0]=this.focus_tgt_path=newpath;
                     this.callChild("ctrlBox",function(){
                         this.renderTGT_Assets();
                     });
+                    
                     this._view_onmousemove=function(e){
                         var movePoint=startPoint.sum(new Vector2(e.screenX-t.x,e.screenY-t.y)),
                             move_c_point=that.transform_canvasViewToCanvas(movePoint.x,movePoint.y);
@@ -293,10 +278,9 @@ class Canvas_Main extends ExCtrl{
                         // var pt=move_c_point.dif(c_point);
     
                         // 矩形内部相对坐标偏移量
-                        var movePoint_canvas=temptgt.worldToLocal(move_c_point);
-    
-                        temptgt.data.w=movePoint_canvas.x;
-                        temptgt.data.h=movePoint_canvas.y;
+                        var movePoint_canvas=that.root_group.worldToDescendant(newpath,move_c_point);
+                        temptgt.data.w=movePoint_canvas.x-temptgt.data.x;
+                        temptgt.data.h=movePoint_canvas.y-temptgt.data.y;
                         that.renderCanvasTGT();
                         CtrlCanvas2d.dot(that.ctx,c_point,3,"#0f0");
                         CtrlCanvas2d.dot(that.ctx,move_c_point,3,"#ff0");
@@ -481,8 +465,6 @@ class Canvas_Main extends ExCtrl{
         hyperplasia_group(){
             // todo
             var temp_group=new PrimitiveTGT__Group([]);
-            // test
-            temp_group.transform_matrix=Matrix2x2T.create.rotate(30*deg);
             var i,
                 path,
                 l=this.select_tgt_path.length,
@@ -514,6 +496,7 @@ class Canvas_Main extends ExCtrl{
             }else{
                 this.select_tgt_path[0]=this.focus_tgt_path=[pGroup.add_children(temp_group)-1];
             }
+            this.renderCanvasTGT();
             this.reRender();
         }
         /** 渲染图元内容
