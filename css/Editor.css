@@ -32,7 +32,9 @@ body {
 :root {
     --toolbox-width: 2.4em;
     --ctrlbox-width: 240rem;
+    --command_status_height:26px;
 }
+
 
 .tip {
     display: block;
@@ -53,7 +55,7 @@ body {
 
 .canvas-box {
     position: absolute;
-    background-color: #444;
+    background-color: var(--colorB5);
     left: var(--toolbox-width);
     right: var(--ctrlbox-width);
     height: 100%;
@@ -75,7 +77,7 @@ body {
     top: 0;
     transform-origin: 0 0;
     background-size: 50%;
-    background-color: #fff;
+    background-color: var(--colorB);
 }
 
 .toolBox-box {
@@ -83,8 +85,8 @@ body {
     left: 0;
     width: var(--toolbox-width);
     height: 100%;
-    border-right: #080 solid 2px;
-    background-color: #020;
+    border-right: var(--colorD3) solid 2px;
+    background-color: var(--colorD0);
 }
 
 .ctrlBox-box {
@@ -223,7 +225,7 @@ body {
     top: 50%;
     width: 0.8em;
     height: 0.8em;
-    border: #000 0.08em solid;
+    border: var(--colorA) 0.08em solid;
     border-radius: 50%;
     background-color: var(--colorA3);
     transform: translateY(-50%);
@@ -268,7 +270,7 @@ body {
     height: 0.8em;
     top: 50%;
     transform: translateY(-50%);
-    background-color: #000;
+    background-color: var(--colorA);
 }
 
 .ctrlBox-tgtAssets-visibility>.iconSpritesSvg {
@@ -276,11 +278,38 @@ body {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    background-color: #fff;
+    background-color: var(--colorB);
 }
 
 .useKeyEvent-Box {
     position: absolute;
     width: 100%;
     height: 100%;
+}
+
+.command_status-box{
+    position: absolute;
+    left:0;
+    bottom: 0;
+    right: var(--ctrlbox-width);
+    height: var(--command_status_height);
+    background-color:var(--colorA);
+    padding-left:12px;
+    line-height: var(--command_status_height);
+    color:var(--colorDT);
+    border-top: var(--colorD3) 2px solid;
+    border-bottom: var(--colorD3) 2px solid;
+}
+.command_status-box::before{
+    content:">";
+}
+
+.contextMenu-main{
+    /* temp */
+    display: none;
+    position: fixed;
+    z-index: 10;
+    background-color: #f00;
+    width: 100px;
+    height: 100px;
 }

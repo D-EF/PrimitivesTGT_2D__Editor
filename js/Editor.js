@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-11 18:00:28
+ * @LastEditTime: 2022-04-12 16:10:50
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -32,7 +32,7 @@ if(window.attachEvent){
  * 获取
  * @param {String} id 在dom中的id
  */
-function getVEL_thenDeleteElement(id){
+function getVEL_ThenDeleteElement(id){
     var tgt=document.getElementById(id),
         rtn= VEL.xmlToVE(tgt.innerHTML);
     tgt.remove();
@@ -91,6 +91,10 @@ class Canvas_Main extends ExCtrl{
             this._view_martix=new Matrix2x2T();
             /** @type {Matrix2x2T} 视口to画布变换矩阵 */
             this._view_to_canvas_martix=null;
+            /**@type {Vector2} 鼠标在视口中的坐标*/
+            this._mouse_position__view=new Vector2();
+            /**@type {Vector2} 鼠标在画布上的坐标*/
+            this._mouse_position__canvas=new Vector2();
         // view end
 
         // tool open
@@ -133,7 +137,9 @@ class Canvas_Main extends ExCtrl{
                     u:5,
                     v:5,
                 },
-            ]
+            ];
+            /**@type {String} 指示当前命令状态 */
+            this.command_status="待命";
         // tool end
         
         // 图元对象tgt 相关 open
@@ -150,23 +156,23 @@ class Canvas_Main extends ExCtrl{
     }
 
     // 成员变量封装, 缓存刷新函数 open
-        refresh_viewBox(){
+        refresh_ViewBox(){
             this.view_box.w= this.elements.canvas_main.offsetWidth;
             this.view_box.h= this.elements.canvas_main.offsetHeight;
-            this.view_martix=this.create_viewMartix();
+            this.view_martix=this.create_ViewMartix();
         }
-        get canvas_width(){
+        get canvas_Width(){
             return this.canvas.width;
         }
-        get canvas_height(){
+        get canvas_Height(){
             return this.canvas.height;
         }
-        set canvas_width(val){
+        set canvas_Width(val){
             this.canvas.width=val;
             this._canvasBox=null;
             return val;
         }
-        set canvas_height(val){
+        set canvas_Height(val){
             this.canvas.height=val;
             this._canvasBox=null;
             return val;
@@ -183,8 +189,23 @@ class Canvas_Main extends ExCtrl{
             this._focus_Point.y=val.y;
         }
         get focus_Point(){ return this._focus_Point;}
-        get canvas_core(){
+        get canvas_Core(){
             return new Vector2(this.canvas_width*0.5,this.canvas_height*0.5);
+        }
+        set mouse_position__view    (val){
+            this._mouse_position__view.x=val.x;
+            this._mouse_position__view.y=val.y;
+        }
+        set mouse_position__canvas  (val){
+            this._mouse_position__canvas.x=val.x;
+            this._mouse_position__canvas.y=val.y;
+        }
+        
+        get mouse_position__View(){
+            return this._mouse_position__view;
+        }
+        get mouse_position__Canvas(){
+            return this._mouse_position__canvas;
         }
     // 成员变量封装, 缓存刷新函数 end
 
@@ -200,11 +221,16 @@ class Canvas_Main extends ExCtrl{
                 document.removeEventListener("mousemove",that._view_onmousemove);
                 document.removeEventListener("mouseup",that._view_onmouseup);
             });
-            // todo
+            
+            // 全局热键 key 注册 
+            addKeyEvent(this.parent_node,false,true,["ctrl","KeyG"],function(e){
+                stopPE(e);that.hyperplasia_Group();
+            });
+            
             addKeyEvent(this.parent_node,false,true,["Control","KeyC"],function(){
                 if(that.focus_tgt_path.length){
                     // navigator.clipboard.writeText();
-                    console.log(that.root_group.get_descendantByPath(that.focus_tgt_path));                
+                    console.log(that.root_group.get_DescendantByPath(that.focus_tgt_path));                
                 }
             });
             addKeyEvent(this.parent_node,false,true,["Control","KeyV"],function(){
@@ -214,14 +240,14 @@ class Canvas_Main extends ExCtrl{
         /** 绘制区域鼠标按下事件
          * @param {MouseEvent} e 
          */
-        mousedownHand__canvas_main(e){
+        mousedownHand__canvas_Main(e){
             if(document._view_isMouseing){
                 return;
             }
             document._view_isMouseing=true;
             
-            var c_point=this.create_canvasPoint(e),
-                startPoint=this.create_viewPoint(e),
+            var c_point=this.create_CanvasPoint(e),
+                startPoint=this.create_ViewPoint(e),
                 t=new Vector2(e.screenX,e.screenY),
                 that=this;
     
@@ -230,9 +256,9 @@ class Canvas_Main extends ExCtrl{
                 var old_point=this.focus_Point.copy();
                 this._view_onmousemove=function(e){
                     var temp_point=new Vector2(t.y-e.screenY,t.x-e.screenX);
-                    temp_point=Vector2.linearMapping_base(that.view_to_canvas_martix,temp_point);
+                    temp_point=Vector2.linearMapping_Base(that.view_to_canvas_martix,temp_point);
                     that.focus_Point=old_point.sum(temp_point);
-                    that.view_martix=that.create_viewMartix();
+                    that.view_martix=that.create_ViewMartix();
                 }
                 this.addMouseEventTodoc()
                 return;
@@ -250,9 +276,9 @@ class Canvas_Main extends ExCtrl{
                 tgtM=this.root_group.get_descendantTransformMatrix__i(this.focus_tgt_path);
                 if(!this.new_tgt_use_scale){
                     // 不使用缩放值 新建一个矩阵
-                    tgtM.multiplication_before(new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_inverse());
+                    tgtM.multiplication_Before(new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_Inverse());
                 }else{
-                    tgtM.multiplication_before(that.view_to_canvas_martix.copy());
+                    tgtM.multiplication_Before(that.view_to_canvas_martix.copy());
                 }
     
                 if(this.tool_index===1){
@@ -261,7 +287,7 @@ class Canvas_Main extends ExCtrl{
                     // todo 日志化操作
                     temptgt.transform_matrix=tgtM;
                     
-                    var newpath=this.root_group.insert_byPath(this.focus_tgt_path,temptgt);
+                    var newpath=this.root_group.insert_ByPath(this.focus_tgt_path,temptgt);
                     var temp_point=this.root_group.worldToDescendant(newpath,c_point);
                     temptgt.data.x=temp_point.x;
                     temptgt.data.y=temp_point.y;
@@ -273,7 +299,7 @@ class Canvas_Main extends ExCtrl{
                     
                     this._view_onmousemove=function(e){
                         var movePoint=startPoint.sum(new Vector2(e.screenX-t.x,e.screenY-t.y)),
-                            move_c_point=that.transform_canvasViewToCanvas(movePoint.x,movePoint.y);
+                            move_c_point=that.transform_CanvasViewToCanvas(movePoint.x,movePoint.y);
                         // 画布相对坐标偏移量
                         // var pt=move_c_point.dif(c_point);
     
@@ -287,12 +313,12 @@ class Canvas_Main extends ExCtrl{
                     }
                     this._view_onmouseup=function(e){
                         var movePoint=startPoint.sum(new Vector2(e.screenX-t.x,e.screenY-t.y)),
-                            move_c_point=that.transform_canvasViewToCanvas(movePoint.x,movePoint.y);
+                            move_c_point=that.transform_CanvasViewToCanvas(movePoint.x,movePoint.y);
                         // 相对坐标偏移量
                         // var pt=move_c_point.dif(c_point);
     
                         var movePoint_canvas=temptgt.worldToLocal(move_c_point);
-                        // that.change_history.add_command(new CQRS_Command__PrimitiveTGT(true,))
+                        // that.change_history.add_Command(new CQRS_Command__PrimitiveTGT(true,))
                     }
                 }
                 this.addMouseEventTodoc();
@@ -309,17 +335,17 @@ class Canvas_Main extends ExCtrl{
         /** 绘制区域 鼠标滚轮事件
          * @param {WheelEvent} e 
          */
-        wheelHand__canvas_main(e){
+        wheelHand__canvas_Main(e){
             stopPE(e);
             if(e.ctrlKey){
                 if(e.deltaY>0){
                     // 缩小
                     this.scale-=0.1
-                    this.reload_viewCanvasTransform();
+                    this.reload_ViewCanvasTransform();
                 }else{
                     // 放大
                     this.scale+=0.1
-                    this.reload_viewCanvasTransform();
+                    this.reload_ViewCanvasTransform();
                 }
                 return;
             }
@@ -331,11 +357,11 @@ class Canvas_Main extends ExCtrl{
                 if(e.deltaY>0){
                     // +旋转
                     this.rotate+=val*deg;
-                    this.reload_viewCanvasTransform();
+                    this.reload_ViewCanvasTransform();
                 }else{
                     // -旋转
                     this.rotate-=val*deg;
-                    this.reload_viewCanvasTransform();
+                    this.reload_ViewCanvasTransform();
                 }
                 return;
             }
@@ -347,17 +373,17 @@ class Canvas_Main extends ExCtrl{
         /** 使用属性计算视图矩阵
          * @return {Matrix2x2T} 返回一个 2x2T 矩阵 
          */
-        create_viewMartix(){
+        create_ViewMartix(){
             /** @type {Matrix2x2T} */
-            var baseMatrix=this.create_viewMartix__base();
+            var baseMatrix=this.create_viewMartix__Base();
             var t=this.focus_Point.copy().linearMapping(baseMatrix);
-            baseMatrix.set_translate(this.view_box.w*0.5-t.y,this.view_box.h*0.5-t.x);
+            baseMatrix.set_Translate(this.view_box.w*0.5-t.y,this.view_box.h*0.5-t.x);
             return baseMatrix;
         }
         /** 使用属性计算视图矩阵
          * @return {Matrix2x2T} 返回一个 2x2T 矩阵  但是没有计算平移量
          */
-        create_viewMartix__base(){
+        create_viewMartix__Base(){
             /** @type {Matrix2x2T} */
             var baseMatrix=new Matrix2x2T(this.scale,0,0,this.scale,0,0).rotate(this.rotate).multiplication(this.third_matrix);
             return baseMatrix;
@@ -370,23 +396,23 @@ class Canvas_Main extends ExCtrl{
                 y:0.5*this.canvas_height
             };
             this.rotate=0;
-            this.reload_viewCanvasTransform();
+            this.reload_ViewCanvasTransform();
         }
         /**@type {Matrix2x2T} 画布变换到视口的矩阵*/
-        set view_martix(m){
+        set view_Martix(m){
             this._view_martix.set_Matrix2x2(m);
             this._view_to_canvas_martix=null;
             this.canvas.style.transform=matrixToCSS(this._view_martix);
             return this._view_martix;
         }
         /**@type {Matrix2x2T} 画布变换到视口的矩阵*/
-        get view_martix(){
+        get view_Martix(){
             return this._view_martix;
         }
         /**@type {Matrix2x2T} 视口变换到画布的矩阵*/
-        get view_to_canvas_martix(){
+        get view_to_canvas_Martix(){
             if(!this._view_to_canvas_martix){
-                this._view_to_canvas_martix=this.view_martix.create_inverse();
+                this._view_to_canvas_martix=this.view_martix.create_Inverse();
             }
             return this._view_to_canvas_martix;
         }
@@ -395,52 +421,52 @@ class Canvas_Main extends ExCtrl{
          * @param {Number} y 坐标值
          * @returns {Vector2} 返回相对坐标
          */
-        transform_canvasViewToCanvas(x,y){
-            return Vector2.linearMapping_beforeTranslate(new Vector2(x,y),this.view_to_canvas_martix);
+        transform_CanvasViewToCanvas(x,y){
+            return Vector2.linearMapping_BeforeTranslate(new Vector2(x,y),this.view_to_canvas_martix);
         }
-        transform_canvasTocanvasView(x,y){
-            return Vector2.linearMapping_afterTranslate(new Vector2(x,y),this.view_martix);
+        transform_CanvasTocanvasView(x,y){
+            return Vector2.linearMapping_AfterTranslate(new Vector2(x,y),this.view_martix);
         }
 
         /** 使用事件对象创建相对于canvas的点
          * @param {MouseEvent} e 
          * @returns {Vector2} 
          */
-        create_canvasPoint(e){
+        create_CanvasPoint(e){
             if(e.target===this.canvas){
                 return new Vector2(e.offsetX,e.offsetY);
             }
-            return this.transform_canvasViewToCanvas(e.offsetX,e.offsetY);
+            return this.transform_CanvasViewToCanvas(e.offsetX,e.offsetY);
         }
         /** 使用事件对象得到view坐标
          * @param {MouseEvent} e view或者canvas上发生的鼠标事件
          * @returns 
          */
-        create_viewPoint(e){
+        create_ViewPoint(e){
             if(e.target===this.canvas){
-                return this.transform_canvasTocanvasView(e.offsetX,e.offsetY);
+                return this.transform_CanvasTocanvasView(e.offsetX,e.offsetY);
             }
             return new Vector2(e.offsetX,e.offsetY);
         }
         /** 使用成员变量 重新加载(刷新) 当前画布变换
          */
-        reload_viewCanvasTransform(){
+        reload_ViewCanvasTransform(){
             var tempM,
                 f=true,
-                temp=this.canvasBox.create_polygonProxy(),
+                temp=this.canvasBox.create_PolygonProxy(),
                 view_box=this.view_box,
                 tp;
             var old=this.focus_Point.copy();
             this.focus_Point=this.canvas_core;
-            tempM=this.create_viewMartix();
+            tempM=this.create_ViewMartix();
             if(!this.can_move_view){
                 for(var i=temp.nodes.length-1;f&&(i>=0);--i){
-                    tp=Vector2.linearMapping_afterTranslate(temp.nodes[i],tempM);
-                    f=view_box.is_inside(tp.x,tp.y);
+                    tp=Vector2.linearMapping_AfterTranslate(temp.nodes[i],tempM);
+                    f=view_box.is_Inside(tp.x,tp.y);
                 }
                 if(!f){
                     this.focus_Point=old;
-                    tempM=this.create_viewMartix();
+                    tempM=this.create_ViewMartix();
                 }
                 this._can_inside=f;
             }
@@ -453,7 +479,7 @@ class Canvas_Main extends ExCtrl{
          */
         rename(){
             if(this.focus_tgt_path&&this.focus_tgt_path.length){   
-                var tgt=this.root_group.get_descendantByPath(this.focus_tgt_path);
+                var tgt=this.root_group.get_DescendantByPath(this.focus_tgt_path);
                 tgt.name=window.prompt("重命名",tgt.name);
                 this.callChild("ctrlBox",function(){
                     this.renderTGT_Assets();
@@ -462,7 +488,7 @@ class Canvas_Main extends ExCtrl{
         }
         /** 新建组 如果当前有焦点，将会把焦点的tgt移动到新组内
          */
-        hyperplasia_group(){
+        hyperplasia_Group(){
             // todo
             var temp_group=new PrimitiveTGT__Group([]);
             var i,
@@ -470,12 +496,12 @@ class Canvas_Main extends ExCtrl{
                 l=this.select_tgt_path.length,
                 temp_p1="-1",
                 temp_p2="";
-            var pGroup=this.root_group.get_parentByPath(this.select_tgt_path[0]);
+            var pGroup=this.root_group.get_ParentByPath(this.select_tgt_path[0]);
             for(i=0;i<l;++i){
                 path=this.select_tgt_path[i];
                 temp_p2=path.join(',');
                 if((path.length)&&(temp_p2.indexOf(temp_p1)===-1)){
-                    temp_group.add_children(this.root_group.get_descendantByPath(path));
+                    temp_group.add_Children(this.root_group.get_DescendantByPath(path));
                     temp_p1=temp_p2;
                 }
             }
@@ -485,7 +511,7 @@ class Canvas_Main extends ExCtrl{
                 path=this.select_tgt_path[i];
                 temp_p2=path.join(',');
                 if((path.length)&&(temp_p2.indexOf(temp_p1)===-1)){
-                    this.root_group.remove_descendantByPath(path);
+                    this.root_group.remove_DescendantByPath(path);
                     temp_p1=temp_p2;
                 }
             }
@@ -494,7 +520,7 @@ class Canvas_Main extends ExCtrl{
                 this.select_tgt_path.length=1;
                 this.focus_tgt_path=this.select_tgt_path[0];
             }else{
-                this.select_tgt_path[0]=this.focus_tgt_path=[pGroup.add_children(temp_group)-1];
+                this.select_tgt_path[0]=this.focus_tgt_path=[pGroup.add_Children(temp_group)-1];
             }
             this.renderCanvasTGT();
             this.reRender();
@@ -503,23 +529,28 @@ class Canvas_Main extends ExCtrl{
          */
         renderCanvasTGT(){
             this.ctx.clearRect(0,0,this.canvasBox.w,this.canvasBox.h);
-            this.canvas_renderer.render_all();
+            this.canvas_renderer.render_All();
         }
 
     // 图元tgt操作相关 end
 
     // 子控件初始化函数 open
-        toolbox_init(){
+        toolbox_Init(){
             return {list:this.tool_list}
         }
-        ctrlbox_init(){
+        ctrlbox_Init(){
             var d={};
             dependencyMapping(d,this,["focus_tgt_path","root_group","ctx","select_tgt_path"]);
-            return [d];
+            return d;
+        }
+        contextMenu_Init(){
+            var d={};
+            dependencyMapping(d,this,["mouse_position__canvas","mouse_position__view"]);
+            return d;
         }
     // 子控件初始化函数 end
 }
-Canvas_Main.prototype.bluePrint=getVEL_thenDeleteElement("temolate_main");
+Canvas_Main.prototype.bluePrint=getVEL_ThenDeleteElement("template_main");
 
 class CtrlBox extends ExCtrl{
     /**
@@ -549,29 +580,36 @@ class CtrlBox extends ExCtrl{
      */
     renderCanvas(){
         this.callParent(function(){
-            this.canvas_renderer.render_all();
+            this.canvas_renderer.render_All();
         });
     }
     /**更改对象隐藏
      * @param {*} path 
      */
-    change_editTGT_visibility(path){
+    change_editTGT_Visibility(path){
 
     }
-    tgtAssets_init(){
+    tgtAssets_Init(){
         var d={};
         dependencyMapping(d,this.data,["root_group","focus_tgt_path","select_tgt_path"]);
         return d ;
     }
     /** 用当前焦点对象刷新 matrix
      */
-    reRender_matrix(){
+    reRender_Matrix(){
         if(this.focused_tgt){
             this.callChild("")
         }
     }
 }
-CtrlBox.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrlBox");
+CtrlBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrlBox");
+
+class ContextMenu extends ExCtrl{
+    constructor(data){
+        super(data);
+    }
+}
+ContextMenu.prototype.bluePrint=getVEL_ThenDeleteElement("template_contextMenu");
 
 class ToolBox extends ExCtrl {
     constructor(data){
@@ -586,7 +624,7 @@ class ToolBox extends ExCtrl {
         this.renderStyle();
     }
 }
-ToolBox.prototype.bluePrint=getVEL_thenDeleteElement("template_toolBox");
+ToolBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_toolBox");
 
 class Ctrl_Matrix2x2T extends ExCtrl{
     constructor(data){
@@ -603,12 +641,12 @@ class Ctrl_Matrix2x2T extends ExCtrl{
         
     }
     callback(){
-        this.render_editing_matrix();
+        this.render_editing_Matrix();
     }
     /**
      * 将矩阵渲染到input
      */
-    render_editing_matrix(){
+    render_editing_Matrix(){
         this.elements.a.value   =this.editing_matrix.a;
         this.elements.b.value   =this.editing_matrix.b;
         this.elements.c.value   =this.editing_matrix.c;
@@ -650,7 +688,7 @@ class Ctrl_Matrix2x2T extends ExCtrl{
      * 鼠标移入时 聚焦并选择input
      * @param {Element} tgt e.target
      */
-    focus_input(tgt){
+    focus_Input(tgt){
         if(tgt.tagName==="INPUT"){
             this.lastF_ctrlid=tgt.ctrl_id;
             tgt.focus();
@@ -661,7 +699,7 @@ class Ctrl_Matrix2x2T extends ExCtrl{
      */
     normalize(){
         // this.editing_matrix.normalize();
-        this.render_editing_matrix();
+        this.render_editing_Matrix();
     }
     /**让input失去焦点
      */
@@ -688,7 +726,7 @@ class Ctrl_Matrix2x2T extends ExCtrl{
         }
     }
 }
-Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_Matrix2x2T");
+Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrl_Matrix2x2T");
 
 class Ctrl_tgtAssets extends ExCtrl{
     /**
@@ -708,17 +746,17 @@ class Ctrl_tgtAssets extends ExCtrl{
         // 列表渲染使用的属性 end
     }
     /**@type {PrimitiveTGT__Group} 图元根路径 */
-    get root_group(){return this.data.root_group;}
-    set focus_tgt_path(val){this.data.focus_tgt_path=val;}
-    get focus_tgt_path(   ){return this.data.focus_tgt_path;}
-    set select_tgt_path(val){this.data.select_tgt_path=val;}
-    get select_tgt_path(   ){return this.data.select_tgt_path;}
+    get root_Group(){return this.data.root_group;}
+    set focus_tgt_Path(val){this.data.focus_tgt_path=val;}
+    get focus_tgt_Path(   ){return this.data.focus_tgt_path;}
+    set select_tgt_Path(val){this.data.select_tgt_path=val;}
+    get select_tgt_Path(   ){return this.data.select_tgt_path;}
     /**重新定向操作对象
      * @param {(Number|String)[]} path root 对象的子 的 下标形式的路径
      * @param {Number} index 渲染到控件中时的下标
      * @param {Boolean} f 追加还是修改
      */
-    redirect_editTGT(_path,index,f){
+    redirect_EditTGT(_path,index,f){
         var ctrl_id="tgt_item-EX_for-tgt_list-C"+index;
         var path=_path;
         if(f){
@@ -752,10 +790,10 @@ class Ctrl_tgtAssets extends ExCtrl{
                 this.old_index=index;
             }
         }
-        this.refresh_selectTGT();
+        this.refresh_SelectTGT();
         this.reRender();
     }
-    refresh_selectTGT(){
+    refresh_SelectTGT(){
         // es6 排序
         var arr=Array.from(this.select_list);
         arr.sort();
@@ -763,7 +801,7 @@ class Ctrl_tgtAssets extends ExCtrl{
             return this.elements[item].path;
         });
     }
-    is_focus(path){
+    is_Focus(path){
         return arrayEqual(path,this.focus_tgt_path);
     }
     /** 路径在被选中的中在哪里
@@ -782,13 +820,13 @@ class Ctrl_tgtAssets extends ExCtrl{
     /**隐藏对象 (不渲染)
      * @param {(Number|String)[]} path 
      */
-    change_editTGT_visibility(path){
+    change_editTGT_Visibility(path){
         this.callParent(
         /**
          * @this {CtrlBox} 
          */
         function(){
-            this.change_editTGT_visibility(path);
+            this.change_editTGT_Visibility(path);
         })
     }
     /**点击事件操作手柄
@@ -798,21 +836,21 @@ class Ctrl_tgtAssets extends ExCtrl{
         var element=e.target;
         var temp;
         if(Number(element.getAttribute("child_length"))){
-            return this.fold_item(element);
+            return this.fold_Item(element);
         }
         if(Number(element.className.indexOf("ctrlBox-tgtAssets-focusBtn")!==-1)){
             temp=element.parentElement;
-            return this.redirect_editTGT(temp.path,Number(temp.getAttribute("index")),e.shiftKey);
+            return this.redirect_EditTGT(temp.path,Number(temp.getAttribute("index")),e.shiftKey);
         }
         if(Number(element.className.indexOf("ctrlBox-tgtAssets-visibility")!==-1)){
             temp=element.parentElement;
             var iconElement=element.firstElementChild;
             if(iconElement.className==="iconSpritesSvg iconSpritesSvg-40"){
                 iconElement.className="iconSpritesSvg iconSpritesSvg-30"
-                return this.change_editTGT_visibility(temp.path,Number(temp.getAttribute("index")),false);
+                return this.change_editTGT_Visibility(temp.path,Number(temp.getAttribute("index")),false);
             }else{
                 iconElement.className="iconSpritesSvg iconSpritesSvg-40"
-                return this.change_editTGT_visibility(temp.path,Number(temp.getAttribute("index")),true);
+                return this.change_editTGT_Visibility(temp.path,Number(temp.getAttribute("index")),true);
             }
         }
     }
@@ -820,7 +858,7 @@ class Ctrl_tgtAssets extends ExCtrl{
      * 折叠操作的函数
      * @param {Element} element 
      */
-    fold_item(element){
+    fold_Item(element){
         var i=Number(element.getAttribute("index")),
             d,ed,temp_element=element;
         if(this.folded_data.has(i)){
@@ -838,7 +876,7 @@ class Ctrl_tgtAssets extends ExCtrl{
         this.renderStyle();
     }
     /**
-     * 刷新列表折叠样式
+     * 列表折叠样式
      */
     get folded_CSS_Select(){
         /*ctrlBox-tgtAssets-item-depth(d):nth-child(index)~li:not(ctrlBox-tgtAssets-item-depth(d):nth-child(index+1)~li)*/
@@ -848,13 +886,14 @@ class Ctrl_tgtAssets extends ExCtrl{
         for(data of folded_data){
             i=data[0];
             ed=data[1].ed;
-            console.log(data);
-            folded_CSS_Selects.unshift(',.CtrlLib-'+this.c__ctrl_lib_id+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")");
+            folded_CSS_Selects.unshift(
+                ',.CtrlLib-'+this.c__ctrl_lib_id+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")"
+            );
         }
         return ".cnm"+folded_CSS_Selects.join('');
     }
 }
-Ctrl_tgtAssets.prototype.bluePrint=getVEL_thenDeleteElement("template_ctrl_tgtAssets");
+Ctrl_tgtAssets.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrl_tgtAssets");
 
 window.Ctrl_tgtAssets=Ctrl_tgtAssets;
 CtrlBox.prototype.childCtrlType={
@@ -864,7 +903,8 @@ CtrlBox.prototype.childCtrlType={
 
 Canvas_Main.prototype.childCtrlType={
     ToolBox,
-    CtrlBox
+    CtrlBox,
+    ContextMenu
 }
 function main(){
     var canvasMain=new Canvas_Main();
