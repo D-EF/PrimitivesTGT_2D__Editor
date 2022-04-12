@@ -56,15 +56,18 @@ body {
 .canvas-box {
     position: absolute;
     background-color: var(--colorB5);
-    left: var(--toolbox-width);
+    top:0;
+    bottom: var(--command_status_height);
+    left:0;
     right: var(--ctrlbox-width);
-    height: 100%;
-    width: auto;
 }
 
 .canvas-view {
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    left: var(--toolbox-width);
+    right:0;
+    top:0;
+    bottom:0;
 }
 
 .canvas-view div {
@@ -81,6 +84,7 @@ body {
 }
 
 .toolBox-box {
+    top:0;
     position: absolute;
     left: 0;
     width: var(--toolbox-width);

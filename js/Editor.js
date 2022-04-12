@@ -1,10 +1,10 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-12 18:16:09
+ * @LastEditTime: 2022-04-12 21:11:30
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
-import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
+import { add_DependencyListener, arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
 import { addKeyEvent, KeyNotbook, stopPE } from "../../../basics/dom_tool.js";
 import { deg } from "../../../basics/math_ex.js";
 import {
@@ -92,9 +92,9 @@ class Canvas_Main extends ExCtrl{
             /** @type {Matrix2x2T} 视口to画布变换矩阵 */
             this._view_to_canvas_martix=null;
             /**@type {Vector2} 鼠标在视口中的坐标*/
-            this._mouse_Position__View=new Vector2();
+            this._mouse_position__view=new Vector2();
             /**@type {Vector2} 鼠标在画布上的坐标*/
-            this._mouse_Position__Canvas=new Vector2();
+            this._mouse_position__canvas=new Vector2();
         // view end
 
         // tool open
@@ -138,6 +138,9 @@ class Canvas_Main extends ExCtrl{
                     v:5,
                 },
             ];
+            /** @type {String} 当前菜单状态*/
+            this.ctrl_menu_type;
+            dependencyMapping(this,this.data,["ctrl_menu_type"]);
             /**@type {String} 指示当前命令状态 */
             this.command_status="待命";
         // tool end
@@ -193,19 +196,19 @@ class Canvas_Main extends ExCtrl{
             return new Vector2(this.canvas_width*0.5,this.canvas_height*0.5);
         }
         set mouse_Position__view    (val){
-            this._mouse_Position__View.x=val.x;
-            this._mouse_Position__View.y=val.y;
+            this._mouse_position__view.x=val.x;
+            this._mouse_position__view.y=val.y;
         }
         set mouse_Position__canvas  (val){
-            this._mouse_Position__Canvas.x=val.x;
-            this._mouse_Position__Canvas.y=val.y;
+            this._mouse_position__canvas.x=val.x;
+            this._mouse_position__canvas.y=val.y;
         }
         
         get mouse_Position__view(){
-            return this._mouse_Position__View;
+            return this._mouse_position__view;
         }
         get mouse_Position__canvas(){
-            return this._mouse_Position__Canvas;
+            return this._mouse_position__canvas;
         }
     // 成员变量封装, 缓存刷新函数 end
 
@@ -236,6 +239,18 @@ class Canvas_Main extends ExCtrl{
             addKeyEvent(this.parent_node,false,true,["Control","KeyV"],function(){
                 console.log("v");
             });
+        }
+        /** 鼠标右键时的事件
+         * @param {PointerEvent} e 
+         */
+        mouseMunuHand(e){
+            this.call_CtrlMenu("mouse");
+        }
+        /** 呼出菜单
+         * @param {String} type 菜单类型
+         */
+        call_CtrlMenu(type){
+            this.ctrl_menu_type=type;
         }
         /** 绘制区域鼠标按下事件
          * @param {MouseEvent} e 
@@ -545,7 +560,7 @@ class Canvas_Main extends ExCtrl{
         }
         contextMenu_Init(){
             var d={};
-            dependencyMapping(d,this,["mouse_Position__Canvas","mouse_Position__View"]);
+            dependencyMapping(d,this,["mouse_Position__Canvas","mouse_position__view","ctrl_menu_type"]);
             return d;
         }
     // 子控件初始化函数 end
@@ -607,6 +622,13 @@ CtrlBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrlBox");
 class ContextMenu extends ExCtrl{
     constructor(data){
         super(data);
+        /**
+         * @typedef ContextMenuData
+         * @property {String} ctrl_menu_type 当前的菜单type
+         */
+        /**@type {ContextMenuData} */
+        this.data;
+        add_DependencyListener(this.data,"ctrl_menu_type")
     }
 }
 ContextMenu.prototype.bluePrint=getVEL_ThenDeleteElement("template_contextMenu");
@@ -832,7 +854,7 @@ class Ctrl_tgtAssets extends ExCtrl{
     /**点击事件操作手柄
      * @param {MouseEvent} e
      */
-    clickHand_item (e){
+    clickHand_Item(e){
         var element=e.target;
         var temp;
         if(Number(element.getAttribute("child_length"))){
