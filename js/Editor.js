@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-12 16:10:50
+ * @LastEditTime: 2022-04-12 18:16:09
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -76,7 +76,7 @@ class Canvas_Main extends ExCtrl{
 
         // view open
             /** @type {Vector2} 焦点坐标 */
-            this._focus_Point=new Vector2(0.5*this.canvas_width,0.5*this.canvas_height);
+            this._focus_point=new Vector2(0.5*this.canvas_width,0.5*this.canvas_height);
             /** @type {Number} 缩放值 */
             this.scale=1;
             /** @type {Number} 旋转值*/
@@ -92,9 +92,9 @@ class Canvas_Main extends ExCtrl{
             /** @type {Matrix2x2T} 视口to画布变换矩阵 */
             this._view_to_canvas_martix=null;
             /**@type {Vector2} 鼠标在视口中的坐标*/
-            this._mouse_position__view=new Vector2();
+            this._mouse_Position__View=new Vector2();
             /**@type {Vector2} 鼠标在画布上的坐标*/
-            this._mouse_position__canvas=new Vector2();
+            this._mouse_Position__Canvas=new Vector2();
         // view end
 
         // tool open
@@ -161,18 +161,18 @@ class Canvas_Main extends ExCtrl{
             this.view_box.h= this.elements.canvas_main.offsetHeight;
             this.view_martix=this.create_ViewMartix();
         }
-        get canvas_Width(){
+        get canvas_width(){
             return this.canvas.width;
         }
-        get canvas_Height(){
+        get canvas_height(){
             return this.canvas.height;
         }
-        set canvas_Width(val){
+        set canvas_width(val){
             this.canvas.width=val;
             this._canvasBox=null;
             return val;
         }
-        set canvas_Height(val){
+        set canvas_height(val){
             this.canvas.height=val;
             this._canvasBox=null;
             return val;
@@ -184,28 +184,28 @@ class Canvas_Main extends ExCtrl{
             return this._canvasBox;
         }
         /** @type {Vector2 ()} */
-        set focus_Point(val){
-            this._focus_Point.x=val.x;
-            this._focus_Point.y=val.y;
+        set focus_point(val){
+            this._focus_point.x=val.x;
+            this._focus_point.y=val.y;
         }
-        get focus_Point(){ return this._focus_Point;}
-        get canvas_Core(){
+        get focus_point(){ return this._focus_point;}
+        get canvas_core(){
             return new Vector2(this.canvas_width*0.5,this.canvas_height*0.5);
         }
-        set mouse_position__view    (val){
-            this._mouse_position__view.x=val.x;
-            this._mouse_position__view.y=val.y;
+        set mouse_Position__view    (val){
+            this._mouse_Position__View.x=val.x;
+            this._mouse_Position__View.y=val.y;
         }
-        set mouse_position__canvas  (val){
-            this._mouse_position__canvas.x=val.x;
-            this._mouse_position__canvas.y=val.y;
+        set mouse_Position__canvas  (val){
+            this._mouse_Position__Canvas.x=val.x;
+            this._mouse_Position__Canvas.y=val.y;
         }
         
-        get mouse_position__View(){
-            return this._mouse_position__view;
+        get mouse_Position__view(){
+            return this._mouse_Position__View;
         }
-        get mouse_position__Canvas(){
-            return this._mouse_position__canvas;
+        get mouse_Position__canvas(){
+            return this._mouse_Position__Canvas;
         }
     // 成员变量封装, 缓存刷新函数 end
 
@@ -253,11 +253,11 @@ class Canvas_Main extends ExCtrl{
     
             if(e.button===1&&(!this._can_inside||this.can_move_view)){
                 // 鼠标中键 拖动画面
-                var old_point=this.focus_Point.copy();
+                var old_point=this.focus_point.copy();
                 this._view_onmousemove=function(e){
                     var temp_point=new Vector2(t.y-e.screenY,t.x-e.screenX);
-                    temp_point=Vector2.linearMapping_Base(that.view_to_canvas_martix,temp_point);
-                    that.focus_Point=old_point.sum(temp_point);
+                    temp_point=Vector2.linearMapping__Base(that.view_to_canvas_martix,temp_point);
+                    that.focus_point=old_point.sum(temp_point);
                     that.view_martix=that.create_ViewMartix();
                 }
                 this.addMouseEventTodoc()
@@ -273,7 +273,7 @@ class Canvas_Main extends ExCtrl{
                     return;
                 }
                 var tgtM;
-                tgtM=this.root_group.get_descendantTransformMatrix__i(this.focus_tgt_path);
+                tgtM=this.root_group.get_DescendantTransformMatrix__I(this.focus_tgt_path);
                 if(!this.new_tgt_use_scale){
                     // 不使用缩放值 新建一个矩阵
                     tgtM.multiplication_Before(new Matrix2x2T().rotate(this.rotate).multiplication(this.third_matrix).create_Inverse());
@@ -375,15 +375,15 @@ class Canvas_Main extends ExCtrl{
          */
         create_ViewMartix(){
             /** @type {Matrix2x2T} */
-            var baseMatrix=this.create_viewMartix__Base();
-            var t=this.focus_Point.copy().linearMapping(baseMatrix);
+            var baseMatrix=this.create_ViewMartix__Base();
+            var t=this.focus_point.copy().linearMapping(baseMatrix);
             baseMatrix.set_Translate(this.view_box.w*0.5-t.y,this.view_box.h*0.5-t.x);
             return baseMatrix;
         }
         /** 使用属性计算视图矩阵
          * @return {Matrix2x2T} 返回一个 2x2T 矩阵  但是没有计算平移量
          */
-        create_viewMartix__Base(){
+        create_ViewMartix__Base(){
             /** @type {Matrix2x2T} */
             var baseMatrix=new Matrix2x2T(this.scale,0,0,this.scale,0,0).rotate(this.rotate).multiplication(this.third_matrix);
             return baseMatrix;
@@ -391,7 +391,7 @@ class Canvas_Main extends ExCtrl{
         /** 清除线性变换并平移至居中位置
          */
         viewCtrl_100Center(){
-            this.focus_Point={
+            this.focus_point={
                 x:0.5*this.canvas_width,
                 y:0.5*this.canvas_height
             };
@@ -399,18 +399,18 @@ class Canvas_Main extends ExCtrl{
             this.reload_ViewCanvasTransform();
         }
         /**@type {Matrix2x2T} 画布变换到视口的矩阵*/
-        set view_Martix(m){
+        set view_martix(m){
             this._view_martix.set_Matrix2x2(m);
             this._view_to_canvas_martix=null;
             this.canvas.style.transform=matrixToCSS(this._view_martix);
             return this._view_martix;
         }
         /**@type {Matrix2x2T} 画布变换到视口的矩阵*/
-        get view_Martix(){
+        get view_martix(){
             return this._view_martix;
         }
         /**@type {Matrix2x2T} 视口变换到画布的矩阵*/
-        get view_to_canvas_Martix(){
+        get view_to_canvas_martix(){
             if(!this._view_to_canvas_martix){
                 this._view_to_canvas_martix=this.view_martix.create_Inverse();
             }
@@ -422,10 +422,10 @@ class Canvas_Main extends ExCtrl{
          * @returns {Vector2} 返回相对坐标
          */
         transform_CanvasViewToCanvas(x,y){
-            return Vector2.linearMapping_BeforeTranslate(new Vector2(x,y),this.view_to_canvas_martix);
+            return Vector2.linearMapping__BeforeTranslate(new Vector2(x,y),this.view_to_canvas_martix);
         }
         transform_CanvasTocanvasView(x,y){
-            return Vector2.linearMapping_AfterTranslate(new Vector2(x,y),this.view_martix);
+            return Vector2.linearMapping__AfterTranslate(new Vector2(x,y),this.view_martix);
         }
 
         /** 使用事件对象创建相对于canvas的点
@@ -456,16 +456,16 @@ class Canvas_Main extends ExCtrl{
                 temp=this.canvasBox.create_PolygonProxy(),
                 view_box=this.view_box,
                 tp;
-            var old=this.focus_Point.copy();
-            this.focus_Point=this.canvas_core;
+            var old=this.focus_point.copy();
+            this.focus_point=this.canvas_core;
             tempM=this.create_ViewMartix();
             if(!this.can_move_view){
                 for(var i=temp.nodes.length-1;f&&(i>=0);--i){
-                    tp=Vector2.linearMapping_AfterTranslate(temp.nodes[i],tempM);
+                    tp=Vector2.linearMapping__AfterTranslate(temp.nodes[i],tempM);
                     f=view_box.is_Inside(tp.x,tp.y);
                 }
                 if(!f){
-                    this.focus_Point=old;
+                    this.focus_point=old;
                     tempM=this.create_ViewMartix();
                 }
                 this._can_inside=f;
@@ -545,7 +545,7 @@ class Canvas_Main extends ExCtrl{
         }
         contextMenu_Init(){
             var d={};
-            dependencyMapping(d,this,["mouse_position__canvas","mouse_position__view"]);
+            dependencyMapping(d,this,["mouse_Position__Canvas","mouse_Position__View"]);
             return d;
         }
     // 子控件初始化函数 end
@@ -746,11 +746,11 @@ class Ctrl_tgtAssets extends ExCtrl{
         // 列表渲染使用的属性 end
     }
     /**@type {PrimitiveTGT__Group} 图元根路径 */
-    get root_Group(){return this.data.root_group;}
-    set focus_tgt_Path(val){this.data.focus_tgt_path=val;}
-    get focus_tgt_Path(   ){return this.data.focus_tgt_path;}
-    set select_tgt_Path(val){this.data.select_tgt_path=val;}
-    get select_tgt_Path(   ){return this.data.select_tgt_path;}
+    get root_group(){return this.data.root_group;}
+    set focus_tgt_path(val){this.data.focus_tgt_path=val;}
+    get focus_tgt_path(   ){return this.data.focus_tgt_path;}
+    set select_tgt_path(val){this.data.select_tgt_path=val;}
+    get select_tgt_path(   ){return this.data.select_tgt_path;}
     /**重新定向操作对象
      * @param {(Number|String)[]} path root 对象的子 的 下标形式的路径
      * @param {Number} index 渲染到控件中时的下标
@@ -878,19 +878,20 @@ class Ctrl_tgtAssets extends ExCtrl{
     /**
      * 列表折叠样式
      */
-    get folded_CSS_Select(){
+    get folded_CSS_select(){
         /*ctrlBox-tgtAssets-item-depth(d):nth-child(index)~li:not(ctrlBox-tgtAssets-item-depth(d):nth-child(index+1)~li)*/
         var folded_data=this.folded_data,
-            folded_CSS_Selects=[],
+            folded_CSS_selects=[],
             i,ed,data;
         for(data of folded_data){
             i=data[0];
             ed=data[1].ed;
-            folded_CSS_Selects.unshift(
+            folded_CSS_selects.unshift(
                 ',.CtrlLib-'+this.c__ctrl_lib_id+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")"
             );
         }
-        return ".cnm"+folded_CSS_Selects.join('');
+        console.log(".cnm"+folded_CSS_selects.join(''));
+        return ".cnm"+folded_CSS_selects.join('');
     }
 }
 Ctrl_tgtAssets.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrl_tgtAssets");

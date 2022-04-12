@@ -1,7 +1,7 @@
 <!--
  * @Date: 2022-02-12 14:43:03
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-12 16:46:03
+ * @LastEditTime: 2022-04-12 18:17:33
  * @FilePath: \def-web\js\visual\Editor\Editor.html
 -->
 <!DOCTYPE html>
@@ -27,7 +27,7 @@
                 class="canvas-view"
                 tabindex="1" 
                 pa-mouseenter="tgt.focus();"
-                pa-mousemove="this._mouse_position__view=this.create_ViewPoint(e);this._mouse_position__canvas=this.create_CanvasPoint(e);"
+                pa-mousemove="this._mouse_Position__View=this.create_ViewPoint(e);this._mouse_Position__Canvas=this.create_CanvasPoint(e);"
                 pa-mouseover="tgt.blur();"
                 pa-contextmenu="stopPE(e);this.call_ContextMenu()"
                 >
@@ -108,17 +108,17 @@
     </template>
     <template id="template_ctrl_tgtAssets">
         <ctrlstyle>
-            ${this.folded_CSS_Select}{
+            ${this.folded_CSS_select}{
                 display:none;
             }
         </ctrlstyle>
         <div>
             <ul ctrl-id="tgt_list" class="ctrlBox-tgtAssets_main" ctrl-for="this.group_iterator.init();this.group_iterator.judge_IsNotEnd();this.group_iterator.next()" pa-click="this.clickHand_Item(e)">
-                <li ctrl-id="tgt_item" index="${this.group_iterator.get_now__Di()}" depth="${this.group_iterator.get_now__Depth()}" child_length="${this.group_iterator.get_Now().data.length}" 
-                    class="ctrlBox-tgtAssets-item ctrlBox-tgtAssets-item-color_${this.group_iterator.get_now__Depth()%3} unrap_ellipsis"
-                    api-attr-path="Array.from(this.group_iterator.get_now__Path())"
-                    ctrl-style="margin-left:${this.group_iterator.get_now__Depth()*12}px;">
-                    <i class="ctrlBox-tgtAssets-focusBtn ${(this.is_Focus(this.group_iterator.get_now__Path())?((this.old_index=this.group_iterator.get_now__Di()),'ctrlBox-tgtAssets-focusBtn-editing'):'')+' '+(this.focusIndex(this.group_iterator.get_now__Path())?'ctrlBox-tgtAssets-focusBtn-selecting':'')}" ctrl-id="focusBtn"></i>
+                <li ctrl-id="tgt_item" index="${this.group_iterator.get_Now__Di()}" depth="${this.group_iterator.get_Now__Depth()}" child_length="${this.group_iterator.get_Now().data.length}" 
+                    class="ctrlBox-tgtAssets-item ctrlBox-tgtAssets-item-color_${this.group_iterator.get_Now__Depth()%3} unrap_ellipsis"
+                    api-attr-path="Array.from(this.group_iterator.get_Now__Path())"
+                    ctrl-style="margin-left:${this.group_iterator.get_Now__Depth()*12}px;">
+                    <i class="ctrlBox-tgtAssets-focusBtn ${(this.is_Focus(this.group_iterator.get_Now__Path())?((this.old_index=this.group_iterator.get_Now__Di()),'ctrlBox-tgtAssets-focusBtn-editing'):'')+' '+(this.focusIndex(this.group_iterator.get_Now__Path())?'ctrlBox-tgtAssets-focusBtn-selecting':'')}" ctrl-id="focusBtn"></i>
                     <i class="ctrlBox-tgtAssets-visibility"><i class="iconSpritesSvg iconSpritesSvg-${this.group_iterator.get_Now().visibility?3:4}0"></i>
                     </i>
                     ${this.group_iterator.get_Now().name}
