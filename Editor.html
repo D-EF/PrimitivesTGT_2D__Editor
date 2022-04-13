@@ -1,7 +1,7 @@
 <!--
  * @Date: 2022-02-12 14:43:03
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-12 20:13:50
+ * @LastEditTime: 2022-04-13 15:04:27
  * @FilePath: \def-web\js\visual\Editor\Editor.html
 -->
 <!DOCTYPE html>
@@ -46,7 +46,7 @@
     <template id="template_contextMenu">
         <div class="contextMenu-main"
             ctrl-id="contextMenu_main"
-            pa-click="this.elements['contextMenu_main'].style.display='none'"
+            pa-click="this.clickHand(e)"
             pa-contextmenu="stopPE(e);"
         >
         </div>
@@ -58,9 +58,9 @@
             }
         </ctrlstyle>
         <div class="toolBox-main">
-            <ul class="toolBox-list" ctrl-for="this.i=0;this.i<this.data.list.length;++this.i">
-                <li class="toolBox-item" pa-click="this.tabTool(${this.i});" title="${this.data.list[this.i].name}">
-                    <i class="toolBox-item-icon iconSpritesSvg iconSpritesSvg-${this.data.list[this.i].u+''+this.data.list[this.i].v} "></i>
+            <ul class="toolBox-list" ctrl-for="this.list_iterator.init();this.list_iterator.is_NotEnd();this.list_iterator.next()">
+                <li class="toolBox-item" pa-click="this.tabTool(${this.list_iterator.get_Now__Path()});" title="${this.list_iterator.get_Now().tip} (${this.list_iterator.get_Now().hotkey})">
+                    <i class="toolBox-item-icon iconSpritesSvg iconSpritesSvg-${this.list_iterator.get_Now().u+''+this.list_iterator.get_Now().v} "></i>
                 </li>
             </ul>
         </div>
@@ -113,7 +113,7 @@
             }
         </ctrlstyle>
         <div>
-            <ul ctrl-id="tgt_list" class="ctrlBox-tgtAssets_main" ctrl-for="this.group_iterator.init();this.group_iterator.judge_IsNotEnd();this.group_iterator.next()" pa-click="this.clickHand_Item(e)">
+            <ul ctrl-id="tgt_list" class="ctrlBox-tgtAssets_main" ctrl-for="this.group_iterator.init();this.group_iterator.is_NotEnd();this.group_iterator.next()" pa-click="this.clickHand_Item(e)">
                 <li ctrl-id="tgt_item" index="${this.group_iterator.get_Now__Di()}" depth="${this.group_iterator.get_Now__Depth()}" child_length="${this.group_iterator.get_Now().data.length}" 
                     class="ctrlBox-tgtAssets-item ctrlBox-tgtAssets-item-color_${this.group_iterator.get_Now__Depth()%3} unrap_ellipsis"
                     api-attr-path="Array.from(this.group_iterator.get_Now__Path())"

@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-12 21:11:30
+ * @LastEditTime: 2022-04-13 20:22:13
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { add_DependencyListener, arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -98,46 +98,6 @@ class Canvas_Main extends ExCtrl{
         // view end
 
         // tool open
-            /** @type {Number} 当前工具的 index */
-            this.tool_index=0;
-            /** @type {{name:String,u:Number,v:Number}[]} 工具列表 */
-            this.tool_list=[
-                {
-                    name:"cursor",
-                    u:5,
-                    v:3,
-                },
-                {
-                    name:"rect",
-                    u:0,
-                    v:5,
-                },
-                {
-                    name:"arc",
-                    u:1,
-                    v:5,
-                },
-                {
-                    name:"sector",
-                    u:2,
-                    v:5,
-                },
-                {
-                    name:"polygon",
-                    u:3,
-                    v:5,
-                },
-                {
-                    name:"bezier",
-                    u:4,
-                    v:5,
-                },
-                {
-                    name:"path",
-                    u:5,
-                    v:5,
-                },
-            ];
             /** @type {String} 当前菜单状态*/
             this.ctrl_menu_type;
             dependencyMapping(this,this.data,["ctrl_menu_type"]);
@@ -551,7 +511,7 @@ class Canvas_Main extends ExCtrl{
 
     // 子控件初始化函数 open
         toolbox_Init(){
-            return {list:this.tool_list}
+            return;
         }
         ctrlbox_Init(){
             var d={};
@@ -619,17 +579,62 @@ class CtrlBox extends ExCtrl{
 }
 CtrlBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrlBox");
 
+
+/**
+ * @typedef ctrl_menu_node
+ * @property {String} text 当前的菜单显示文本
+ * @property {ctrl_menu_node[]} child 子菜单
+ */
+/**
+ * @typedef ContextMenuData
+ * @property {String} ctrl_menu_type 当前的菜单type
+ * @property {ctrl_menu_node} ctrl_menu_data 当前的菜单type
+ */
+// todo
 class ContextMenu extends ExCtrl{
     constructor(data){
         super(data);
-        /**
-         * @typedef ContextMenuData
-         * @property {String} ctrl_menu_type 当前的菜单type
-         */
         /**@type {ContextMenuData} */
         this.data;
-        add_DependencyListener(this.data,"ctrl_menu_type")
     }
+    // 逻辑动作 open
+        /**通过路径执行动作
+         * @param {Number[]} parh 路径
+         */
+        do_byPath(parh){
+            
+        }
+    // 逻辑动作end
+
+    // 控件动作 open
+        callback(){
+            var that=this;
+            add_DependencyListener(this.data,"ctrl_menu_type",function(){
+                document.addEventListener("click",function(){
+                    that.hiddend
+                })
+            });
+        }
+        hidden(){
+            this.parent_node.style.display="none";
+        }
+        show(){
+            this.parent_node.style.display="block";
+        }
+        /**
+         * @param {PointerEvent} e 
+         */
+        clickHand(e){
+            this.path=e.target.path;
+            this.do_byPath(path);
+        }
+        /**
+         * @param {MouseEvent} e 
+         */
+        mouseoverHand(e){
+            this.path=e.target.path;
+        }
+    // 控件动作end
 }
 ContextMenu.prototype.bluePrint=getVEL_ThenDeleteElement("template_contextMenu");
 
@@ -637,13 +642,42 @@ class ToolBox extends ExCtrl {
     constructor(data){
         super(data);
         this.actIndex=0;
+
+        /**
+         * @typedef Tool_Node 工具
+         * @property {String} hotkey    热键
+         * @property {String} tip       提示
+         * @property {String} [cmd]     用于 cqrs 的命令
+         * @property {Number} u         图标在精灵图的坐标
+         * @property {Number} v         图标在精灵图的坐标
+         * @property {Tool_Node[]} chlid 子节点
+         */
+        /**@type {Tool_Node} */
+        this.data.list={
+            child:[
+                {hotkey:"KeyQ",tip:"Cursor",cmd:null,u:5,v:3},
+                {hotkey:"KeyA",tip:"Create",cmd:"create",u:3,v:1,
+                    child:[
+                        {hotkey:"KeyR",tip:"Rect"   ,cmd:"create rect"   ,u:0,v:5},
+                        {hotkey:"KeyA",tip:"Arc"    ,cmd:"create arc"    ,u:1,v:5},
+                        {hotkey:"KeyS",tip:"Sector" ,cmd:"create sector" ,u:2,v:5},
+                        {hotkey:"KeyD",tip:"Polygon",cmd:"create polygon",u:3,v:5},
+                        {hotkey:"KeyB",tip:"Bezier" ,cmd:"create bezier" ,u:4,v:5},
+                        {hotkey:"KeyC",tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
+                    ]
+                }
+            ]
+        };
+        this.list_iterator=new Iterator__Tree(this.data.list,"child");
+        /**@type {Tool_Node} */
+        this._now_tool;
     }
-    tabTool(i){
-        this.actIndex=i;
-        this.callParent(function(){
-            this.tool_index=i;
-        })
-        this.renderStyle();
+    callback(){
+        // 注册热键到父组件
+        
+    }
+    load_Command(cmd){
+        
     }
 }
 ToolBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_toolBox");
