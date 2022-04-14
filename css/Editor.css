@@ -107,11 +107,14 @@ body {
 .ctrlBox-box label {
     font-size: 12px;
 }
-
+.toolBox-list{
+    height:0;
+}
 .toolBox-item {
-    width: 100%;
-    height: min-content;
+    width: var(--toolbox-width);
+    height: var(--toolbox-width);
     border: #080 solid 1px;
+    background-color: var(--colorD0)
 }
 
 .toolBox-item-icon {

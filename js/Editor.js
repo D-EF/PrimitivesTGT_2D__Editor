@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-13 20:22:13
+ * @LastEditTime: 2022-04-14 21:22:31
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { add_DependencyListener, arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -98,6 +98,22 @@ class Canvas_Main extends ExCtrl{
         // view end
 
         // tool open
+            this.tool_list={
+                cmd:"base",
+                child:[
+                    {hotkey:"KeyQ",tip:"Cursor",cmd:null,u:5,v:3},
+                    {hotkey:"KeyA",tip:"Create",cmd:"create",u:3,v:1,
+                        child:[
+                            {hotkey:"KeyR",tip:"Rect"   ,cmd:"create rect"   ,u:0,v:5},
+                            {hotkey:"KeyA",tip:"Arc"    ,cmd:"create arc"    ,u:1,v:5},
+                            {hotkey:"KeyS",tip:"Sector" ,cmd:"create sector" ,u:2,v:5},
+                            {hotkey:"KeyD",tip:"Polygon",cmd:"create polygon",u:3,v:5},
+                            {hotkey:"KeyB",tip:"Bezier" ,cmd:"create bezier" ,u:4,v:5},
+                            {hotkey:"KeyC",tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
+                        ]
+                    }
+                ]
+            };
             /** @type {String} 当前菜单状态*/
             this.ctrl_menu_type;
             dependencyMapping(this,this.data,["ctrl_menu_type"]);
@@ -119,9 +135,12 @@ class Canvas_Main extends ExCtrl{
     }
 
     // 成员变量封装, 缓存刷新函数 open
+        get canvas_main(){
+            return this.elements.canvas_main;
+        }
         refresh_ViewBox(){
-            this.view_box.w= this.elements.canvas_main.offsetWidth;
-            this.view_box.h= this.elements.canvas_main.offsetHeight;
+            this.view_box.w= this.canvas_main.offsetWidth;
+            this.view_box.h= this.canvas_main.offsetHeight;
             this.view_martix=this.create_ViewMartix();
         }
         get canvas_width(){
@@ -174,9 +193,9 @@ class Canvas_Main extends ExCtrl{
 
     //控件动作 open
         callback(){
-            this.elements["canvas_main"].appendChild(this.canvas);
+            this.canvas_main.appendChild(this.canvas);
             this.elements["root_hand"].focus();
-            this.view_box=new Data_Rect(0,0,this.elements.canvas_main.offsetWidth,this.elements.canvas_main.offsetHeight);
+            this.view_box=new Data_Rect(0,0,this.canvas_main.offsetWidth,this.canvas_main.offsetHeight);
             this.viewCtrl_100Center();
             var that=this;
             document.addEventListener("mouseup",function(e){
@@ -511,7 +530,9 @@ class Canvas_Main extends ExCtrl{
 
     // 子控件初始化函数 open
         toolbox_Init(){
-            return;
+            var d={};
+            dependencyMapping(d,this,["list"],["tool_list"]);
+            return d ;
         }
         ctrlbox_Init(){
             var d={};
@@ -638,46 +659,81 @@ class ContextMenu extends ExCtrl{
 }
 ContextMenu.prototype.bluePrint=getVEL_ThenDeleteElement("template_contextMenu");
 
+/**
+ * @typedef Tool_Node 工具
+ * @property {String} hotkey    热键
+ * @property {String} tip       提示
+ * @property {String} cmd     用于 cqrs 的命令
+ * @property {Number} u         图标在精灵图的坐标
+ * @property {Number} v         图标在精灵图的坐标
+ * @property {Tool_Node[]} chlid 子节点
+ */
 class ToolBox extends ExCtrl {
     constructor(data){
         super(data);
         this.actIndex=0;
-
-        /**
-         * @typedef Tool_Node 工具
-         * @property {String} hotkey    热键
-         * @property {String} tip       提示
-         * @property {String} [cmd]     用于 cqrs 的命令
-         * @property {Number} u         图标在精灵图的坐标
-         * @property {Number} v         图标在精灵图的坐标
-         * @property {Tool_Node[]} chlid 子节点
-         */
         /**@type {Tool_Node} */
-        this.data.list={
-            child:[
-                {hotkey:"KeyQ",tip:"Cursor",cmd:null,u:5,v:3},
-                {hotkey:"KeyA",tip:"Create",cmd:"create",u:3,v:1,
-                    child:[
-                        {hotkey:"KeyR",tip:"Rect"   ,cmd:"create rect"   ,u:0,v:5},
-                        {hotkey:"KeyA",tip:"Arc"    ,cmd:"create arc"    ,u:1,v:5},
-                        {hotkey:"KeyS",tip:"Sector" ,cmd:"create sector" ,u:2,v:5},
-                        {hotkey:"KeyD",tip:"Polygon",cmd:"create polygon",u:3,v:5},
-                        {hotkey:"KeyB",tip:"Bezier" ,cmd:"create bezier" ,u:4,v:5},
-                        {hotkey:"KeyC",tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
-                    ]
-                }
-            ]
-        };
+        this.data.list;
+        console.log(this.data.list)
         this.list_iterator=new Iterator__Tree(this.data.list,"child");
         /**@type {Tool_Node} */
         this._now_tool;
+        this._now_tool_path;
+        this.eg=[];
     }
-    callback(){
-        // 注册热键到父组件
+    get folded_open_CSS_select(){
         
     }
-    load_Command(cmd){
-        
+    // callback(){
+    //     // 装载热键
+    //     var oldDepth=0,nowDepth=0,
+    //         path;
+    //     /**@type {KeyNotbook} */
+    //     var keyNotbook=this.parent_ctrl.canvas_main.keyNotbook;
+    //     var i=this.list_iterator,
+    //         keystate_code;
+
+    //     for(i.init();i.is_NotEnd();i.next()){
+    //         nowDepth=i.get_Now__Depth();
+    //         path=i.get_Now__NodePath();
+    //         console.log(nowDepth);
+    //         if(oldDepth!==nowDepth){
+    //             keystate_code=(path[nowDepth-1])||this.data.list.cmd;
+    //             keyNotbook.change_State(keystate_code);
+    //         }
+    //         addKeyEvent(this.parent_ctrl.canvas_main,false,true,i.get_Now().hotkey,function(){
+
+    //         })
+    //         oldDepth=nowDepth;
+    //     }
+    // }
+    /** 切换工具
+     * @param {Tool_Node} tool 
+     */
+    tab_Tool(tool,path){
+        this._now_tool=tool;
+    }
+    /** item 点击事件
+     * @param {PointerEvent} e 
+     * @param {HTMLElement} tgt 
+     */
+    clickHand__item(e,tgt){
+        var temp=tgt,
+            filedClassList=[],
+            f=new Array();
+        for(var i=tgt.depth;i>=0;--i){
+            f[i]=true;
+        }
+        do{
+            if(f[temp.depth]){
+                filedClassList.push(".toolBox-item:nth(n+"+temp.di+')'+
+                    ".toolBox-item:nth(-n+"+temp.next_same_depth_Di||999+')'+
+                    ".toolBox-item-d"+(temp.depth+1));
+                f[temp.depth]=false;
+            }
+            temp=temp.previousElementSibling;
+        }while(f[0]);
+        this.filed
     }
 }
 ToolBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_toolBox");

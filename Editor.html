@@ -1,7 +1,7 @@
 <!--
  * @Date: 2022-02-12 14:43:03
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-13 15:04:27
+ * @LastEditTime: 2022-04-14 21:15:19
  * @FilePath: \def-web\js\visual\Editor\Editor.html
 -->
 <!DOCTYPE html>
@@ -24,6 +24,7 @@
                 pa-mousedown="this.mousedownHand__canvas_Main(e)"
                 pa-wheel="this.wheelHand__canvas_Main(e)"
                 pa-resize="this.refresh_ViewBox()"
+                pa-keydown[keya]="console.log(a)"
                 class="canvas-view"
                 tabindex="1" 
                 pa-mouseenter="tgt.focus();"
@@ -56,11 +57,33 @@
             .toolBox-list .toolBox-item:nth-child(${this.actIndex+1}) i{
                 background-color:var(--colorC)
             }
+            
+            ${this.folded_open_CSS_select}{
+            }
         </ctrlstyle>
         <div class="toolBox-main">
-            <ul class="toolBox-list" ctrl-for="this.list_iterator.init();this.list_iterator.is_NotEnd();this.list_iterator.next()">
-                <li class="toolBox-item" pa-click="this.tabTool(${this.list_iterator.get_Now__Path()});" title="${this.list_iterator.get_Now().tip} (${this.list_iterator.get_Now().hotkey})">
-                    <i class="toolBox-item-icon iconSpritesSvg iconSpritesSvg-${this.list_iterator.get_Now().u+''+this.list_iterator.get_Now().v} "></i>
+            <ul class="toolBox-list" ctrl-for="this.list_iterator.init();this.list_iterator.is_NotEnd();this.list_iterator.next()" ctrl-id="toolList">
+                <li 
+                    api-attr-di="this.list_iterator.get_Now__Di()"
+                    api-attr-path="this.list_iterator.get_Now__Path()"
+                    api-attr-depth="this.list_iterator.get_Now__Depth()"
+                    class="toolBox-item toolBox-item-d${tgt.depth}" 
+                    title="${this.list_iterator.get_Now().tip} (${this.list_iterator.get_Now().hotkey})"
+                    ctrl-style="transform:translate(${tgt.depth*100}%,0);
+                            margin-top:calc(var(--toolbox-width) * ${this.previousElement&&
+                            (this.previousElement.path.length>tgt.path.length?
+                                (this.previousElement.path[this.previousElement.path.length-1]*-1)
+                            :this.previousElement.path.length<tgt.path.length?
+                                -1
+                            :0)
+                        })"
+                    pa-click="this.clickHand__item(e,tgt)"
+                    ctrl-id="toolItem"
+                    cnm="${(this.eg[tgt.depth]&&(this.eg[tgt.depth].next_same_depth_Di=tgt.di)),
+                        (this.eg[tgt.depth]=tgt),
+                        (this.previousElement=tgt),''}"
+                >
+                    <i class="toolBox-item-icon iconSpritesSvg iconSpritesSvg-${this.list_iterator.get_Now().u+''+this.list_iterator.get_Now().v}"></i>
                 </li>
             </ul>
         </div>
