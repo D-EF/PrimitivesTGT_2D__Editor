@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-15 20:16:46
+ * @LastEditTime: 2022-04-15 20:57:23
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { add_DependencyListener, arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -112,9 +112,12 @@ class Canvas_Main extends ExCtrl{
                             {hotkey:["KeyC"],tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
                         ]
                     },
-                    {hotkey:['Ctrl','KeyG'],tip:"Group" ,cmd:"create Group"   ,u:7,v:5},
+                    {hotkey:['Ctrl','KeyG'],tip:"Group" ,cmd:"create Group"   ,u:7,v:3},
                     {hotkey:['Ctrl','KeyJ'],tip:"CV"    ,cmd:"CV"   ,u:4,v:3,},
-                    {hotkey:['F2'],tip:"rename"    ,cmd:"rename"   ,u:1,v:3,},
+                    {hotkey:['F2']  ,tip:"Rename" ,cmd:"rename" ,u:1,v:3,},
+                    {hotkey:['KeyG'],tip:"Move"   ,cmd:"move"   ,u:9,v:3,},
+                    {hotkey:['KeyS'],tip:"Scale"  ,cmd:"scale"  ,u:6,v:2,},
+                    {hotkey:['KeyR'],tip:"Rotate" ,cmd:"rotate" ,u:1,v:1,},
                 ]
             };
             /** @type {String} 当前菜单状态*/
