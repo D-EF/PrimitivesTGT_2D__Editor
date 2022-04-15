@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-14 21:22:31
+ * @LastEditTime: 2022-04-15 20:16:46
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { add_DependencyListener, arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -101,17 +101,20 @@ class Canvas_Main extends ExCtrl{
             this.tool_list={
                 cmd:"base",
                 child:[
-                    {hotkey:"KeyQ",tip:"Cursor",cmd:null,u:5,v:3},
-                    {hotkey:"KeyA",tip:"Create",cmd:"create",u:3,v:1,
+                    {hotkey:["KeyQ"],tip:"Cursor",cmd:null,u:5,v:3},
+                    {hotkey:["KeyA"],tip:"Create",cmd:"create",u:3,v:1,
                         child:[
-                            {hotkey:"KeyR",tip:"Rect"   ,cmd:"create rect"   ,u:0,v:5},
-                            {hotkey:"KeyA",tip:"Arc"    ,cmd:"create arc"    ,u:1,v:5},
-                            {hotkey:"KeyS",tip:"Sector" ,cmd:"create sector" ,u:2,v:5},
-                            {hotkey:"KeyD",tip:"Polygon",cmd:"create polygon",u:3,v:5},
-                            {hotkey:"KeyB",tip:"Bezier" ,cmd:"create bezier" ,u:4,v:5},
-                            {hotkey:"KeyC",tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
+                            {hotkey:["KeyR"],tip:"Rect"   ,cmd:"create rect"   ,u:0,v:5},
+                            {hotkey:["KeyA"],tip:"Arc"    ,cmd:"create arc"    ,u:1,v:5},
+                            {hotkey:["KeyS"],tip:"Sector" ,cmd:"create sector" ,u:2,v:5},
+                            {hotkey:["KeyD"],tip:"Polygon",cmd:"create polygon",u:3,v:5},
+                            {hotkey:["KeyB"],tip:"Bezier" ,cmd:"create bezier" ,u:4,v:5},
+                            {hotkey:["KeyC"],tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
                         ]
-                    }
+                    },
+                    {hotkey:['Ctrl','KeyG'],tip:"Group" ,cmd:"create Group"   ,u:7,v:5},
+                    {hotkey:['Ctrl','KeyJ'],tip:"CV"    ,cmd:"CV"   ,u:4,v:3,},
+                    {hotkey:['F2'],tip:"rename"    ,cmd:"rename"   ,u:1,v:3,},
                 ]
             };
             /** @type {String} 当前菜单状态*/
@@ -209,15 +212,6 @@ class Canvas_Main extends ExCtrl{
                 stopPE(e);that.hyperplasia_Group();
             });
             
-            addKeyEvent(this.parent_node,false,true,["Control","KeyC"],function(){
-                if(that.focus_tgt_path.length){
-                    // navigator.clipboard.writeText();
-                    console.log(that.root_group.get_DescendantByPath(that.focus_tgt_path));                
-                }
-            });
-            addKeyEvent(this.parent_node,false,true,["Control","KeyV"],function(){
-                console.log("v");
-            });
         }
         /** 鼠标右键时的事件
          * @param {PointerEvent} e 
@@ -671,7 +665,6 @@ ContextMenu.prototype.bluePrint=getVEL_ThenDeleteElement("template_contextMenu")
 class ToolBox extends ExCtrl {
     constructor(data){
         super(data);
-        this.actIndex=0;
         /**@type {Tool_Node} */
         this.data.list;
         console.log(this.data.list)
@@ -680,60 +673,59 @@ class ToolBox extends ExCtrl {
         this._now_tool;
         this._now_tool_path;
         this.eg=[];
+        this.folded_open_CSS_select=".cnm";
     }
-    get folded_open_CSS_select(){
-        
-    }
-    // callback(){
-    //     // 装载热键
-    //     var oldDepth=0,nowDepth=0,
-    //         path;
-    //     /**@type {KeyNotbook} */
-    //     var keyNotbook=this.parent_ctrl.canvas_main.keyNotbook;
-    //     var i=this.list_iterator,
-    //         keystate_code;
-
-    //     for(i.init();i.is_NotEnd();i.next()){
-    //         nowDepth=i.get_Now__Depth();
-    //         path=i.get_Now__NodePath();
-    //         console.log(nowDepth);
-    //         if(oldDepth!==nowDepth){
-    //             keystate_code=(path[nowDepth-1])||this.data.list.cmd;
-    //             keyNotbook.change_State(keystate_code);
-    //         }
-    //         addKeyEvent(this.parent_ctrl.canvas_main,false,true,i.get_Now().hotkey,function(){
-
-    //         })
-    //         oldDepth=nowDepth;
-    //     }
-    // }
     /** 切换工具
      * @param {Tool_Node} tool 
      */
     tab_Tool(tool,path){
+        // todo
         this._now_tool=tool;
     }
-    /** item 点击事件
-     * @param {PointerEvent} e 
+    /** 让 item 和祖先和儿子出现
      * @param {HTMLElement} tgt 
      */
-    clickHand__item(e,tgt){
+    showHand(tgt){
         var temp=tgt,
-            filedClassList=[],
+            foldedClassList=[],
             f=new Array();
         for(var i=tgt.depth;i>=0;--i){
             f[i]=true;
         }
         do{
             if(f[temp.depth]){
-                filedClassList.push(".toolBox-item:nth(n+"+temp.di+')'+
-                    ".toolBox-item:nth(-n+"+temp.next_same_depth_Di||999+')'+
+                foldedClassList.push(".toolBox-item:nth-child(n+"+temp.di+')'+
+                    ".toolBox-item:nth-child(-n+"+(temp.next_same_depth_Di||999)+')'+
                     ".toolBox-item-d"+(temp.depth+1));
                 f[temp.depth]=false;
             }
             temp=temp.previousElementSibling;
         }while(f[0]);
-        this.filed
+        
+        this.folded_open_CSS_select=foldedClassList.join(",.CtrlLib-"+this.c__ctrl_lib_id+' ');
+        this.renderStyle();
+    }
+    hiddenHand(){
+        this.folded_open_CSS_select="cnm";
+        this.renderStyle();
+    }
+    get folded_CSS_select(){
+        if(!this._folded_CSS_select){
+            var i,
+                folded=[];
+            for(i=this._maxDepth;i>0;--i){
+                folded.push(".toolBox-item-d"+i);
+            }
+            this._folded_CSS_select=folded.join(",.CtrlLib-"+this.c__ctrl_lib_id+' ');
+        }
+        return this._folded_CSS_select;
+    }
+    get maxDepth(){
+        return this._maxDepth;
+    }
+    set maxDepth(val){
+        this._maxDepth=val;
+        this._folded_CSS_select="";
     }
 }
 ToolBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_toolBox");
