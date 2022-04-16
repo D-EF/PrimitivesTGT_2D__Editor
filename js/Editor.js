@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-15 20:57:23
+ * @LastEditTime: 2022-04-16 17:28:35
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { add_DependencyListener, arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -118,6 +118,7 @@ class Canvas_Main extends ExCtrl{
                     {hotkey:['KeyG'],tip:"Move"   ,cmd:"move"   ,u:9,v:3,},
                     {hotkey:['KeyS'],tip:"Scale"  ,cmd:"scale"  ,u:6,v:2,},
                     {hotkey:['KeyR'],tip:"Rotate" ,cmd:"rotate" ,u:1,v:1,},
+                    {hotkey:['KeyM'],tip:"Linear mapping" ,cmd:"rotate" ,u:6,v:5},
                 ]
             };
             /** @type {String} 当前菜单状态*/
@@ -213,6 +214,10 @@ class Canvas_Main extends ExCtrl{
             // 全局热键 key 注册 
             addKeyEvent(this.parent_node,false,true,["ctrl","KeyG"],function(e){
                 stopPE(e);that.hyperplasia_Group();
+            });
+            // 全局热键 key 注册 
+            addKeyEvent(this.parent_node,false,true,["F2"],function(e){
+                stopPE(e);that.rename();
             });
             
         }
@@ -496,11 +501,16 @@ class Canvas_Main extends ExCtrl{
                     temp_p1=temp_p2;
                 }
             }
-            temp_p1="-1";
-            temp_p2="";
+            temp_p1=null;
+            temp_p2=null;
             for(i=l-1;i>=0;--i){
                 path=this.select_tgt_path[i];
                 temp_p2=path.join(',');
+                if(this.select_tgt_path[i-1]){
+                    temp_p1=this.select_tgt_path[i-1].join(',');
+                }else{
+                    temp_p1='-1';
+                }
                 if((path.length)&&(temp_p2.indexOf(temp_p1)===-1)){
                     this.root_group.remove_DescendantByPath(path);
                     temp_p1=temp_p2;
@@ -997,7 +1007,6 @@ class Ctrl_tgtAssets extends ExCtrl{
                 ',.CtrlLib-'+this.c__ctrl_lib_id+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")"
             );
         }
-        console.log(".cnm"+folded_CSS_selects.join(''));
         return ".cnm"+folded_CSS_selects.join('');
     }
 }
