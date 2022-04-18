@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-16 17:28:35
+ * @LastEditTime: 2022-04-18 21:27:39
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { add_DependencyListener, arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -39,7 +39,7 @@ function getVEL_ThenDeleteElement(id){
     return rtn;
 }
 
-/**
+/** 矩阵转换成css的样子
  * @param {Matrix2x2T} m 
  * @returns {String}
  */
@@ -56,6 +56,16 @@ function matrixToCSS(m){
     +")"
 }
 
+/**
+ * @typedef Tool_Node 工具
+ * @property {String} hotkey    热键
+ * @property {String} tip       提示
+ * @property {String} cmd     用于 cqrs 的命令
+ * @property {Number} u         图标在精灵图的坐标
+ * @property {Number} v         图标在精灵图的坐标
+ * @property {Tool_Node[]} chlid 子节点
+ */
+
 class Canvas_Main extends ExCtrl{
     constructor(data){
         super(data);
@@ -70,8 +80,8 @@ class Canvas_Main extends ExCtrl{
         this.view_box=null;
 
         // 暂存事件 open
-            this._view_onmouseup
-            this._view_onmousemove
+            this._view_onmouseup;
+            this._view_onmousemove;
         // 暂存事件 end
 
         // view open
@@ -98,6 +108,7 @@ class Canvas_Main extends ExCtrl{
         // view end
 
         // tool open
+        /**@type {Tool_Node} */
             this.tool_list={
                 cmd:"base",
                 child:[
@@ -119,8 +130,19 @@ class Canvas_Main extends ExCtrl{
                     {hotkey:['KeyS'],tip:"Scale"  ,cmd:"scale"  ,u:6,v:2,},
                     {hotkey:['KeyR'],tip:"Rotate" ,cmd:"rotate" ,u:1,v:1,},
                     {hotkey:['KeyM'],tip:"Linear mapping" ,cmd:"rotate" ,u:6,v:5},
+                    {hotkey:['Ctrl',"KeyC"],tip:"Copy" ,cmd:"copy" ,u:4,v:3},
+                    {hotkey:['Ctrl','Shift',"KeyC"],tip:"Copy_SameReference" ,cmd:"copy_SameReference" ,u:8,v:4},
                 ]
             };
+            this.global_hotkey=[
+                {hotkey:['Ctrl'],tip:"nothing" ,cmd:"",u:0,v:0},
+                {hotkey:['Shift'],tip:"nothing" ,cmd:"",u:0,v:0},
+                {hotkey:['Shift'],tip:"nothing" ,cmd:"",u:0,v:0}
+            ];
+            /** @type {Tool_Node[]} */
+            this.alternative_hotkey=[
+                {}
+            ];
             /** @type {String} 当前菜单状态*/
             this.ctrl_menu_type;
             dependencyMapping(this,this.data,["ctrl_menu_type"]);
@@ -666,15 +688,6 @@ class ContextMenu extends ExCtrl{
 }
 ContextMenu.prototype.bluePrint=getVEL_ThenDeleteElement("template_contextMenu");
 
-/**
- * @typedef Tool_Node 工具
- * @property {String} hotkey    热键
- * @property {String} tip       提示
- * @property {String} cmd     用于 cqrs 的命令
- * @property {Number} u         图标在精灵图的坐标
- * @property {Number} v         图标在精灵图的坐标
- * @property {Tool_Node[]} chlid 子节点
- */
 class ToolBox extends ExCtrl {
     constructor(data){
         super(data);
