@@ -1,10 +1,10 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-18 21:27:39
+ * @LastEditTime: 2022-04-19 11:25:29
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
-import { add_DependencyListener, arrayDiff, arrayEqual, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
+import { add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
 import { addKeyEvent, KeyNotbook, stopPE } from "../../../basics/dom_tool.js";
 import { deg } from "../../../basics/math_ex.js";
 import {
@@ -15,7 +15,7 @@ import { Bezier_Polygon, Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_
 import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, CQRS_Command__PrimitiveTGT } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../visual.js";
-
+import { hotkey } from "./Editor_config.js";
 // 阻止关闭页面
 function addOnBeforeUnload(e) {
 	var ev = e || event;
@@ -55,16 +55,6 @@ function matrixToCSS(m){
     ].join(',')
     +")"
 }
-
-/**
- * @typedef Tool_Node 工具
- * @property {String} hotkey    热键
- * @property {String} tip       提示
- * @property {String} cmd     用于 cqrs 的命令
- * @property {Number} u         图标在精灵图的坐标
- * @property {Number} v         图标在精灵图的坐标
- * @property {Tool_Node[]} chlid 子节点
- */
 
 class Canvas_Main extends ExCtrl{
     constructor(data){
@@ -108,41 +98,6 @@ class Canvas_Main extends ExCtrl{
         // view end
 
         // tool open
-        /**@type {Tool_Node} */
-            this.tool_list={
-                cmd:"base",
-                child:[
-                    {hotkey:["KeyQ"],tip:"Cursor",cmd:null,u:5,v:3},
-                    {hotkey:["KeyA"],tip:"Create",cmd:"create",u:3,v:1,
-                        child:[
-                            {hotkey:["KeyR"],tip:"Rect"   ,cmd:"create rect"   ,u:0,v:5},
-                            {hotkey:["KeyA"],tip:"Arc"    ,cmd:"create arc"    ,u:1,v:5},
-                            {hotkey:["KeyS"],tip:"Sector" ,cmd:"create sector" ,u:2,v:5},
-                            {hotkey:["KeyD"],tip:"Polygon",cmd:"create polygon",u:3,v:5},
-                            {hotkey:["KeyB"],tip:"Bezier" ,cmd:"create bezier" ,u:4,v:5},
-                            {hotkey:["KeyC"],tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
-                        ]
-                    },
-                    {hotkey:['Ctrl','KeyG'],tip:"Group" ,cmd:"create Group"   ,u:7,v:3},
-                    {hotkey:['Ctrl','KeyJ'],tip:"CV"    ,cmd:"CV"   ,u:4,v:3,},
-                    {hotkey:['F2']  ,tip:"Rename" ,cmd:"rename" ,u:1,v:3,},
-                    {hotkey:['KeyG'],tip:"Move"   ,cmd:"move"   ,u:9,v:3,},
-                    {hotkey:['KeyS'],tip:"Scale"  ,cmd:"scale"  ,u:6,v:2,},
-                    {hotkey:['KeyR'],tip:"Rotate" ,cmd:"rotate" ,u:1,v:1,},
-                    {hotkey:['KeyM'],tip:"Linear mapping" ,cmd:"rotate" ,u:6,v:5},
-                    {hotkey:['Ctrl',"KeyC"],tip:"Copy" ,cmd:"copy" ,u:4,v:3},
-                    {hotkey:['Ctrl','Shift',"KeyC"],tip:"Copy_SameReference" ,cmd:"copy_SameReference" ,u:8,v:4},
-                ]
-            };
-            this.global_hotkey=[
-                {hotkey:['Ctrl'],tip:"nothing" ,cmd:"",u:0,v:0},
-                {hotkey:['Shift'],tip:"nothing" ,cmd:"",u:0,v:0},
-                {hotkey:['Shift'],tip:"nothing" ,cmd:"",u:0,v:0}
-            ];
-            /** @type {Tool_Node[]} */
-            this.alternative_hotkey=[
-                {}
-            ];
             /** @type {String} 当前菜单状态*/
             this.ctrl_menu_type;
             dependencyMapping(this,this.data,["ctrl_menu_type"]);
@@ -560,7 +515,7 @@ class Canvas_Main extends ExCtrl{
     // 子控件初始化函数 open
         toolbox_Init(){
             var d={};
-            dependencyMapping(d,this,["list"],["tool_list"]);
+            // dependencyMapping(d,this,["list"],["tool_list"]);
             return d ;
         }
         ctrlbox_Init(){
@@ -693,7 +648,7 @@ class ToolBox extends ExCtrl {
         super(data);
         /**@type {Tool_Node} */
         this.data.list;
-        console.log(this.data.list)
+        dependencyMapping(this.data,hotkey,["list"],["tool_list"]);
         this.list_iterator=new Iterator__Tree(this.data.list,"child");
         /**@type {Tool_Node} */
         this._now_tool;
