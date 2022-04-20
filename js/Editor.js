@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-19 11:25:29
+ * @LastEditTime: 2022-04-20 15:09:44
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -12,7 +12,8 @@ import {
     ExCtrl
 } from "../../../ControlLib/CtrlLib.js"
 import { Bezier_Polygon, Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
-import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, CQRS_Command__PrimitiveTGT } from "../../PrimitivesTGT_2D.js";
+import { matrixToCSS } from "../../MatrixController.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../visual.js";
 import { hotkey } from "./Editor_config.js";
@@ -38,24 +39,6 @@ function getVEL_ThenDeleteElement(id){
     tgt.remove();
     return rtn;
 }
-
-/** 矩阵转换成css的样子
- * @param {Matrix2x2T} m 
- * @returns {String}
- */
-function matrixToCSS(m){
-    return "matrix("+
-    [
-        m.a,
-        m.b,
-        m.c,
-        m.d,
-        m.e,
-        m.f,
-    ].join(',')
-    +")"
-}
-
 class Canvas_Main extends ExCtrl{
     constructor(data){
         super(data);
