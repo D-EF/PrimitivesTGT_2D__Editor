@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-20 15:09:44
+ * @LastEditTime: 2022-04-22 15:42:48
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -13,7 +13,7 @@ import {
 } from "../../../ControlLib/CtrlLib.js"
 import { Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
 import { matrixToCSS } from "../../MatrixController.js";
-import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Bezier, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path } from "../../PrimitivesTGT_2D.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../visual.js";
 import { hotkey } from "./Editor_config.js";
