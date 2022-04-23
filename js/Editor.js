@@ -1,10 +1,10 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-22 15:42:48
+ * @LastEditTime: 2022-04-23 10:03:32
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
-import { add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, CQRS_History, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
+import { add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
 import { addKeyEvent, KeyNotbook, stopPE } from "../../../basics/dom_tool.js";
 import { deg } from "../../../basics/math_ex.js";
 import {
@@ -91,7 +91,7 @@ class Canvas_Main extends ExCtrl{
         // 图元对象tgt 相关 open
             this.root_group=new PrimitiveTGT__Group();
             this.canvas_renderer=new Renderer_PrimitiveTGT__Canvas2D([this.root_group],this.ctx);
-            this.change_history=new CQRS_History(this.root_group);
+            // this.change_history=new CQRS_History(this.root_group);
             /**@type {Number[][]}  当前选中的路径集合 */
             this.select_tgt_path=[];
             /**@type {Number[]}  当前焦点的路径 */

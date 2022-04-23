@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-19 09:28:02
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-22 19:34:01
+ * @LastEditTime: 2022-04-23 11:56:42
  * @FilePath: \def-web\js\visual\Editor\js\Editor_config.js
  */
 
@@ -33,18 +33,17 @@ var _hotkey={
                     {hotkey:["KeyC"],tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
                 ]
             },
-            {hotkey:['Ctrl','KeyG'],tip:"Group" ,cmd:"create Group"   ,u:7,v:3},
-            {hotkey:['Ctrl','KeyJ'],tip:"CV"    ,cmd:"CV"   ,u:4,v:3,},
+            {hotkey:['F2']  ,tip:"Rename" ,cmd:"rename" ,u:2,v:4,},
             {hotkey:['Ctrl',"Space"]  ,tip:"Edit" ,cmd:"Edit" ,u:1,v:3,
                 child:[
-                    {hotkey:['F2']  ,tip:"Rename" ,cmd:"rename" ,u:2,v:4,},
                     {hotkey:['KeyG'],tip:"Move"   ,cmd:"move"   ,u:9,v:3,},
                     {hotkey:['KeyS'],tip:"Scale"  ,cmd:"scale"  ,u:6,v:2,},
                     {hotkey:['KeyR'],tip:"Rotate" ,cmd:"rotate" ,u:1,v:1,},
                 ]
             },
             // {hotkey:['KeyM'],tip:"Linear mapping" ,cmd:"rotate" ,u:6,v:5},
-            {hotkey:['Ctrl',"KeyJ"],tip:"Copy" ,cmd:"copy" ,u:4,v:3},
+            {hotkey:['Ctrl','KeyG'],tip:"Group" ,cmd:"create Group"   ,u:7,v:3},
+            {hotkey:['Ctrl','KeyJ'],tip:"Copy & Paste"    ,cmd:"CV"   ,u:4,v:3,},
             {hotkey:['Ctrl','Shift',"KeyJ"],tip:"Copy_SameReference" ,cmd:"copy_SameReference" ,u:8,v:4},
         ]
     },
