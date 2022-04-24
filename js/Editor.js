@@ -1,10 +1,10 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-23 10:03:32
+ * @LastEditTime: 2022-04-24 14:14:55
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
-import { add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
+import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
 import { addKeyEvent, KeyNotbook, stopPE } from "../../../basics/dom_tool.js";
 import { deg } from "../../../basics/math_ex.js";
 import {
@@ -980,6 +980,40 @@ function main(){
 }
 main();
 
+// test
+
+var o=new PrimitiveTGT__Group();
+var d=new Act_History(o,PrimitiveTGT__Group.copy);
+d.set_ActCommand({
+    message: "增加矩形",
+    path: ["add_Children"],
+    args:[new PrimitiveTGT__Rect],
+    isfnc: true,
+    can_overwrite:true,
+},false);
+d.set_ActCommand({
+    message: "增加矩形",
+    path: ["add_Children"],
+    args:[new PrimitiveTGT__Rect],
+    isfnc: true,
+    can_overwrite:true,
+},false);
+d.set_ActCommand({
+    message: "增加矩形",
+    path: ["add_Children"],
+    args:[new PrimitiveTGT__Rect],
+    isfnc: true,
+    can_overwrite:true,
+},false);
+
+console.log(d);
+console.log(d.create_Cache(1));
+/**
+ * @returns {import("../../../basics/Basics.js").Act_Command}
+ */
+function asd(){
+
+}
 // // 复制图片
 // onCopyImg() {
 //     let dom = document.getElementsByClassName("screenLeft")[0];
