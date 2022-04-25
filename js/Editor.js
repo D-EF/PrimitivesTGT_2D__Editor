@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-24 14:14:55
+ * @LastEditTime: 2022-04-25 13:03:14
  * @FilePath: \def-web\js\visual\Editor\js\Editor.js
  */
 import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
@@ -13,7 +13,7 @@ import {
 } from "../../../ControlLib/CtrlLib.js"
 import { Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
 import { matrixToCSS } from "../../MatrixController.js";
-import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path } from "../../PrimitivesTGT_2D.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, PrimitiveTGT } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../visual.js";
 import { hotkey } from "./Editor_config.js";
@@ -243,7 +243,7 @@ class Canvas_Main extends ExCtrl{
                     // todo 日志化操作
                     temptgt.transform_matrix=tgtM;
                     
-                    var newpath=this.root_group.insert_ByPath(this.focus_tgt_path,temptgt);
+                    var newpath=this.root_group.add_ByPath(this.focus_tgt_path,temptgt);
                     var temp_point=this.root_group.worldToDescendant(newpath,c_point);
                     temptgt.data.x=temp_point.x;
                     temptgt.data.y=temp_point.y;
@@ -985,29 +985,59 @@ main();
 var o=new PrimitiveTGT__Group();
 var d=new Act_History(o,PrimitiveTGT__Group.copy);
 d.set_ActCommand({
-    message: "增加矩形",
+    message: "增加矩形1",
     path: ["add_Children"],
     args:[new PrimitiveTGT__Rect],
+    f_copy_args:[null,PrimitiveTGT.copy],
     isfnc: true,
     can_overwrite:true,
 },false);
 d.set_ActCommand({
-    message: "增加矩形",
+    message: "增加矩形2",
     path: ["add_Children"],
     args:[new PrimitiveTGT__Rect],
+    f_copy_args:[null,PrimitiveTGT.copy],
     isfnc: true,
     can_overwrite:true,
 },false);
 d.set_ActCommand({
-    message: "增加矩形",
+    message: "增加矩形3",
     path: ["add_Children"],
     args:[new PrimitiveTGT__Rect],
+    f_copy_args:[null,PrimitiveTGT.copy],
+    isfnc: true,
+    can_overwrite:true,
+},false);
+d.set_ActCommand({
+    message: "插入组1",
+    path: ["insert_ByPath"],
+    args:[[0],new PrimitiveTGT__Group()],
+    f_copy_args:[null,PrimitiveTGT.copy],
+    isfnc: true,
+    can_overwrite:true,
+},false);
+
+d.set_ActCommand({
+    message: "插入组2",
+    path: ["insert_ByPath"],
+    args:[[2],new PrimitiveTGT__Group()],
+    f_copy_args:[null,PrimitiveTGT.copy],
+    isfnc: true,
+    can_overwrite:true,
+},false);
+
+d.set_ActCommand({
+    message: "插入组3",
+    path: ["insert_ByPath"],
+    args:[[2,0],new PrimitiveTGT__Group()],
+    f_copy_args:[null,PrimitiveTGT.copy],
     isfnc: true,
     can_overwrite:true,
 },false);
 
 console.log(d);
-console.log(d.create_Cache(1));
+console.log(d.now_data);
+console.log(d.create_Cache(4));
 /**
  * @returns {import("../../../basics/Basics.js").Act_Command}
  */
