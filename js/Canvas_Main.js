@@ -1,44 +1,20 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-25 13:03:14
- * @FilePath: \def-web\js\visual\Editor\js\Editor.js
+ * @LastEditTime: 2022-04-25 17:56:38
+ * @FilePath: \def-web\js\visual\Editor\js\Canvas_Main.js
  */
 import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
 import { addKeyEvent, KeyNotbook, stopPE } from "../../../basics/dom_tool.js";
 import { deg } from "../../../basics/math_ex.js";
-import {
-    DEF_VirtualElementList as VEL,
-    ExCtrl
-} from "../../../ControlLib/CtrlLib.js"
+import { ExCtrl } from "../../../ControlLib/CtrlLib.js"
 import { Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
 import { matrixToCSS } from "../../MatrixController.js";
 import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, PrimitiveTGT } from "../../PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../visual.js";
-import { hotkey } from "./Editor_config.js";
-// 阻止关闭页面
-function addOnBeforeUnload(e) {
-	var ev = e || event;
-	// ev && (ev.returnValue = '浏览器不会保存你的内容, 你确定要离开?');
-}
- 
-if(window.attachEvent){
-	window.attachEvent('onbeforeunload', addOnBeforeUnload);
-} else {
-	window.addEventListener('beforeunload', addOnBeforeUnload, false);
-}
+import { hotkey, getVEL_ThenDeleteElement } from "./Global.js";
 
-/**
- * 获取
- * @param {String} id 在dom中的id
- */
-function getVEL_ThenDeleteElement(id){
-    var tgt=document.getElementById(id),
-        rtn= VEL.xmlToVE(tgt.innerHTML);
-    tgt.remove();
-    return rtn;
-}
 class Canvas_Main extends ExCtrl{
     constructor(data){
         super(data);
@@ -515,58 +491,6 @@ class Canvas_Main extends ExCtrl{
 }
 Canvas_Main.prototype.bluePrint=getVEL_ThenDeleteElement("template_main");
 
-class CtrlBox extends ExCtrl{
-    /**
-     * @typedef  {Object} CtrlBox_Data
-     * @property {Number[][]} select_tgt_path  选中的路径集合
-     * @property {PrimitiveTGT__Group} root_group 根节点
-     * @property {CanvasRenderingContext2D} ctx 渲染上下文
-     * @property {Number[]} focus_tgt_path 当前焦点的路径
-     */   
-    /**
-     * @param {CtrlBox_Data} data 
-     */
-    constructor(data){     
-        super(data);
-        /**@type {CtrlBox_Data} */
-        this.data;
-    }
-    
-    renderTGT_Assets(){
-        this.callChild("_tgtAssets",
-        /** @param {Ctrl_tgtAssets} that */
-        function(that){
-            that.reRender();
-        })
-    }
-    /** 渲染 图元内容 到画布上
-     */
-    renderCanvas(){
-        this.callParent(function(){
-            this.canvas_renderer.render_All();
-        });
-    }
-    /**更改对象隐藏
-     * @param {*} path 
-     */
-    change_editTGT_Visibility(path){
-
-    }
-    tgtAssets_Init(){
-        var d={};
-        dependencyMapping(d,this.data,["root_group","focus_tgt_path","select_tgt_path"]);
-        return d ;
-    }
-    /** 用当前焦点对象刷新 matrix
-     */
-    reRender_Matrix(){
-        if(this.focused_tgt){
-            this.callChild("")
-        }
-    }
-}
-CtrlBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrlBox");
-
 
 /**
  * @typedef ctrl_menu_node
@@ -693,108 +617,6 @@ class ToolBox extends ExCtrl {
     }
 }
 ToolBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_toolBox");
-
-class Ctrl_Matrix2x2T extends ExCtrl{
-    constructor(data){
-        super(data);
-        /**@type {Matrix2x2T} */
-        this.data;
-        /**@type {String} 上一个被控制的input的ctrl_id */
-        this.lastF_ctrlid;
-        /**@type {Delegate} 重写矩阵时的委托 会获得参数 m (矩阵) */
-        this.reset_D=Delegate.create();
-        /**@type {Matrix2x2T} 编辑中的矩阵*/
-        this.editing_matrix=new Matrix2x2T();
-        this.reload(this.editing_matrix);
-        
-    }
-    callback(){
-        this.render_editing_Matrix();
-    }
-    /**
-     * 将矩阵渲染到input
-     */
-    render_editing_Matrix(){
-        this.elements.a.value   =this.editing_matrix.a;
-        this.elements.b.value   =this.editing_matrix.b;
-        this.elements.c.value   =this.editing_matrix.c;
-        this.elements.d.value   =this.editing_matrix.d;
-        this.elements.e.value   =this.editing_matrix.e;
-        this.elements.f.value   =this.editing_matrix.f;
-    }
-    /**
-     * 重新读取矩阵
-     * @param {Matrix2x2T} m 传入矩阵
-     */
-    reload(m){
-        this.editing_matrix.a=m.a;
-        this.editing_matrix.b=m.b;
-        this.editing_matrix.c=m.c;
-        this.editing_matrix.d=m.d;
-        this.editing_matrix.e=m.e;
-        this.editing_matrix.f=m.f;
-    }
-    /**
-     * 改动矩阵数据
-     * @param {String} key Matrix2x2T 的属性的key
-     */
-    changeM(key,value){
-        var temp=Number(value);
-        if(!isNaN(temp)){
-            this.editing_matrix[key]=this.elements[key].value=value;
-        }else{
-            this.elements[key].value=this.editing_matrix[key];
-        }
-    }
-    /**
-     * 写入矩阵 将会使用 reset_D
-     */
-    reset(){
-        this.reset_D(m);
-    }
-    /**
-     * 鼠标移入时 聚焦并选择input
-     * @param {Element} tgt e.target
-     */
-    focus_Input(tgt){
-        if(tgt.tagName==="INPUT"){
-            this.lastF_ctrlid=tgt.ctrl_id;
-            tgt.focus();
-            tgt.select();
-        }
-    }
-    /**使矩阵标准化
-     */
-    normalize(){
-        // this.editing_matrix.normalize();
-        this.render_editing_Matrix();
-    }
-    /**让input失去焦点
-     */
-    blur(){
-        if(this.lastF_ctrlid){
-            this.elements[this.lastF_ctrlid].blur();
-            var k=Number(this.elements[this.lastF_ctrlid].value);
-            if(isNaN(k)){
-                this.elements[this.lastF_ctrlid].value=this.editing_matrix[this.lastF_ctrlid];
-            }
-            this.lastF_ctrlid="";
-        }
-    }
-    /**鼠标滚轮操作矩阵的属性
-     * @param {WheelEvent} e 
-     */
-    wheel(e){
-        stopPE(e);
-        if(this.lastF_ctrlid){
-            var k=(e.deltaY<0?1:-1)*(e.ctrlKey?0.1:1)*(e.shiftKey?0.1:1)*(e.altKey?0.1:1);
-            k+=Number(this.elements[this.lastF_ctrlid].value);
-            
-            this.changeM(this.lastF_ctrlid,k);
-        }
-    }
-}
-Ctrl_Matrix2x2T.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrl_Matrix2x2T");
 
 class Ctrl_tgtAssets extends ExCtrl{
     /**
@@ -963,99 +785,12 @@ class Ctrl_tgtAssets extends ExCtrl{
 }
 Ctrl_tgtAssets.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrl_tgtAssets");
 
-window.Ctrl_tgtAssets=Ctrl_tgtAssets;
-CtrlBox.prototype.childCtrlType={
-    Ctrl_Matrix2x2T:Ctrl_Matrix2x2T,
-    Ctrl_tgtAssets:Ctrl_tgtAssets
-}
-
 Canvas_Main.prototype.childCtrlType={
     ToolBox,
     CtrlBox,
     ContextMenu
 }
-function main(){
-    var canvasMain=new Canvas_Main();
-    canvasMain.addend(document.body);
+
+export {
+    Canvas_Main
 }
-main();
-
-// test
-
-var o=new PrimitiveTGT__Group();
-var d=new Act_History(o,PrimitiveTGT__Group.copy);
-d.set_ActCommand({
-    message: "增加矩形1",
-    path: ["add_Children"],
-    args:[new PrimitiveTGT__Rect],
-    f_copy_args:[null,PrimitiveTGT.copy],
-    isfnc: true,
-    can_overwrite:true,
-},false);
-d.set_ActCommand({
-    message: "增加矩形2",
-    path: ["add_Children"],
-    args:[new PrimitiveTGT__Rect],
-    f_copy_args:[null,PrimitiveTGT.copy],
-    isfnc: true,
-    can_overwrite:true,
-},false);
-d.set_ActCommand({
-    message: "增加矩形3",
-    path: ["add_Children"],
-    args:[new PrimitiveTGT__Rect],
-    f_copy_args:[null,PrimitiveTGT.copy],
-    isfnc: true,
-    can_overwrite:true,
-},false);
-d.set_ActCommand({
-    message: "插入组1",
-    path: ["insert_ByPath"],
-    args:[[0],new PrimitiveTGT__Group()],
-    f_copy_args:[null,PrimitiveTGT.copy],
-    isfnc: true,
-    can_overwrite:true,
-},false);
-
-d.set_ActCommand({
-    message: "插入组2",
-    path: ["insert_ByPath"],
-    args:[[2],new PrimitiveTGT__Group()],
-    f_copy_args:[null,PrimitiveTGT.copy],
-    isfnc: true,
-    can_overwrite:true,
-},false);
-
-d.set_ActCommand({
-    message: "插入组3",
-    path: ["insert_ByPath"],
-    args:[[2,0],new PrimitiveTGT__Group()],
-    f_copy_args:[null,PrimitiveTGT.copy],
-    isfnc: true,
-    can_overwrite:true,
-},false);
-
-console.log(d);
-console.log(d.now_data);
-console.log(d.create_Cache(4));
-/**
- * @returns {import("../../../basics/Basics.js").Act_Command}
- */
-function asd(){
-
-}
-// // 复制图片
-// onCopyImg() {
-//     let dom = document.getElementsByClassName("screenLeft")[0];
-//     html2canvas(dom, { useCORS: true }).then((canvasFull) => {
-//       console.log(canvasFull);
-//       canvasFull.toBlob((blob) => {
-//         const item = new ClipboardItem({ "image/png": blob });
-//         navigator.clipboard.write([item]);
-//         this.$message({
-//           showClose: true,
-//           message: "复制成功",
-//         });
-//       });
-//     });
-//   }
