@@ -76,7 +76,7 @@ class Canvas_Main extends ExCtrl{
             this.ctrl_menu_type;
             dependencyMapping(this,this.data,["ctrl_menu_type"]);
             /**@type {String} 指示当前命令状态 */
-            this.command_status="待命";
+            this.command_status="wait";
         // tool end
         
         // 图元对象tgt 相关 open
