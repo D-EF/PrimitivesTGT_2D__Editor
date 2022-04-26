@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-25 15:34:16
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-25 21:59:57
+ * @LastEditTime: 2022-04-26 11:08:10
  * @FilePath: \def-web\js\visual\Editor\js\Global.js
  */
 
@@ -75,7 +75,7 @@ dependencyMapping(hotkey,_hotkey,Object.keys(_hotkey));
 
 var canvas=document.createElement("canvas");
 var ctx=canvas.getContext("2d");
-
+canvas.className="canvas";
 /**
  * @typedef  data_global__primitiveTGT_editor
  * @property {Number[][]}               select_tgt_path  选中的路径集合

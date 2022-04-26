@@ -1,32 +1,47 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-25 17:56:38
- * @FilePath: \def-web\js\visual\Editor\js\Canvas_Main.js
+ * @LastEditTime: 2022-04-26 14:14:12
+ * @FilePath: \def-web\js\visual\Editor\js\components\Canvas_Main.js
  */
-import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../../../basics/Basics.js";
-import { addKeyEvent, KeyNotbook, stopPE } from "../../../basics/dom_tool.js";
-import { deg } from "../../../basics/math_ex.js";
-import { ExCtrl } from "../../../ControlLib/CtrlLib.js"
-import { Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../Math2d.js";
-import { matrixToCSS } from "../../MatrixController.js";
-import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, PrimitiveTGT } from "../../PrimitivesTGT_2D.js";
-import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
-import { AnimationCtrl } from "../../visual.js";
-import { hotkey, getVEL_ThenDeleteElement } from "./Global.js";
+import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../../../../basics/Basics.js";
+import { addKeyEvent, KeyNotbook, stopPE } from "../../../../basics/dom_tool.js";
+import { deg } from "../../../../basics/math_ex.js";
+import { ExCtrl } from "../../../../ControlLib/CtrlLib.js"
+import { Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../../Math2d.js";
+import { matrixToCSS } from "../../../MatrixController.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, PrimitiveTGT } from "../../../PrimitivesTGT_2D.js";
+import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
+import { AnimationCtrl } from "../../../visual.js";
+import { getVEL_ThenDeleteElement, global__primitiveTGT_editor } from "../Global.js";
+import { ContextMenu } from "./ContextMenu.js";
+import { CtrlBox } from "./CtrlBox.js";
+import { ToolBox } from "./ToolBox.js";
+
+/** 
+ * @this {Canvas_Main}
+ * @param {Number} o 
+ * @param {Number} n 
+ * @param {import("../Global.js").data_global__primitiveTGT_editor} root 
+ * @param {import("../Global.js").data_global__primitiveTGT_editor} head 
+ */
+function onCanvasReSize(o,n,root,head){
+    this._canvasBox.w=root.canvas_width
+    this._canvasBox.h=root.canvas_height
+}
 
 class Canvas_Main extends ExCtrl{
     constructor(data){
         super(data);
-        this.canvas=document.createElement("canvas");
-        this.canvas.className="canvas";
-        this.canvas_width   =500;
-        this.canvas_height  =500;
-        this.ctx=this.canvas.getContext("2d");
-        /** @type {Data_Rect} */
-        this._canvasBox=null;
-        /** @type {Data_Rect} */
+        /** @type {Data_Rect} 画布的数学矩形*/
+        this._canvasBox=new Data_Rect(0,0,0,0);
+        /** @type {Data_Rect} 视口的数学矩形*/
         this.view_box=null;
+        
+        dependencyMapping(this,global__primitiveTGT_editor,["canvas","ctx","canvas_height","canvas_width"]);
+        add_DependencyListener(this,"canvas_height",onCanvasReSize)
+        this.canvas_height =500;
+        this.canvas_width  =500;
 
         // 暂存事件 open
             this._view_onmouseup;
@@ -78,29 +93,14 @@ class Canvas_Main extends ExCtrl{
     }
 
     // 成员变量封装, 缓存刷新函数 open
-        get canvas_main(){
-            return this.elements.canvas_main;
+        /**@type {HTMLDivElement} */
+        get canvas_view(){
+            return this.elements.canvas_view;
         }
         refresh_ViewBox(){
-            this.view_box.w= this.canvas_main.offsetWidth;
-            this.view_box.h= this.canvas_main.offsetHeight;
+            this.view_box.w= this.canvas_view.offsetWidth;
+            this.view_box.h= this.canvas_view.offsetHeight;
             this.view_martix=this.create_ViewMartix();
-        }
-        get canvas_width(){
-            return this.canvas.width;
-        }
-        get canvas_height(){
-            return this.canvas.height;
-        }
-        set canvas_width(val){
-            this.canvas.width=val;
-            this._canvasBox=null;
-            return val;
-        }
-        set canvas_height(val){
-            this.canvas.height=val;
-            this._canvasBox=null;
-            return val;
         }
         get canvasBox(){
             if(!this._canvasBox){
@@ -136,9 +136,9 @@ class Canvas_Main extends ExCtrl{
 
     //控件动作 open
         callback(){
-            this.canvas_main.appendChild(this.canvas);
+            this.canvas_view.appendChild(this.canvas);
             this.elements["root_hand"].focus();
-            this.view_box=new Data_Rect(0,0,this.canvas_main.offsetWidth,this.canvas_main.offsetHeight);
+            this.view_box=new Data_Rect(0,0,this.canvas_view.offsetWidth,this.canvas_view.offsetHeight);
             this.viewCtrl_100Center();
             var that=this;
             document.addEventListener("mouseup",function(e){
@@ -490,300 +490,6 @@ class Canvas_Main extends ExCtrl{
     // 子控件初始化函数 end
 }
 Canvas_Main.prototype.bluePrint=getVEL_ThenDeleteElement("template_main");
-
-
-/**
- * @typedef ctrl_menu_node
- * @property {String} text 当前的菜单显示文本
- * @property {ctrl_menu_node[]} child 子菜单
- */
-/**
- * @typedef ContextMenuData
- * @property {String} ctrl_menu_type 当前的菜单type
- * @property {ctrl_menu_node} ctrl_menu_data 当前的菜单type
- */
-// todo
-class ContextMenu extends ExCtrl{
-    constructor(data){
-        super(data);
-        /**@type {ContextMenuData} */
-        this.data;
-    }
-    // 逻辑动作 open
-        /**通过路径执行动作
-         * @param {Number[]} parh 路径
-         */
-        do_byPath(parh){
-            
-        }
-    // 逻辑动作end
-
-    // 控件动作 open
-        callback(){
-            var that=this;
-            add_DependencyListener(this.data,"ctrl_menu_type",function(){
-                document.addEventListener("click",function(){
-                    that.hiddend
-                })
-            });
-        }
-        hidden(){
-            this.parent_node.style.display="none";
-        }
-        show(){
-            this.parent_node.style.display="block";
-        }
-        /**
-         * @param {PointerEvent} e 
-         */
-        clickHand(e){
-            this.path=e.target.path;
-            this.do_byPath(path);
-        }
-        /**
-         * @param {MouseEvent} e 
-         */
-        mouseoverHand(e){
-            this.path=e.target.path;
-        }
-    // 控件动作end
-}
-ContextMenu.prototype.bluePrint=getVEL_ThenDeleteElement("template_contextMenu");
-
-class ToolBox extends ExCtrl {
-    constructor(data){
-        super(data);
-        /**@type {Tool_Node} */
-        this.data.list;
-        dependencyMapping(this.data,hotkey,["list"],["tool_list"]);
-        this.list_iterator=new Iterator__Tree(this.data.list,"child");
-        /**@type {Tool_Node} */
-        this._now_tool;
-        this._now_tool_path;
-        this.eg=[];
-        this.folded_open_CSS_select=".cnm";
-    }
-    /** 切换工具
-     * @param {Tool_Node} tool 
-     */
-    tab_Tool(tool,path){
-        // todo
-        this._now_tool=tool;
-    }
-    /** 让 item 和祖先和儿子出现
-     * @param {HTMLElement} tgt 
-     */
-    showHand(tgt){
-        var temp=tgt,
-            foldedClassList=[],
-            f=new Array();
-        for(var i=tgt.depth;i>=0;--i){
-            f[i]=true;
-        }
-        do{
-            if(f[temp.depth]){
-                foldedClassList.push(".toolBox-item:nth-child(n+"+temp.di+')'+
-                    ".toolBox-item:nth-child(-n+"+(temp.next_same_depth_Di||999)+')'+
-                    ".toolBox-item-d"+(temp.depth+1));
-                f[temp.depth]=false;
-            }
-            temp=temp.previousElementSibling;
-        }while(f[0]);
-        
-        this.folded_open_CSS_select=foldedClassList.join(",.CtrlLib-"+this.c__ctrl_lib_id+' ');
-        this.renderStyle();
-    }
-    hiddenHand(){
-        this.folded_open_CSS_select="cnm";
-        this.renderStyle();
-    }
-    get folded_CSS_select(){
-        if(!this._folded_CSS_select){
-            var i,
-                folded=[];
-            for(i=this._maxDepth;i>0;--i){
-                folded.push(".toolBox-item-d"+i);
-            }
-            this._folded_CSS_select=folded.join(",.CtrlLib-"+this.c__ctrl_lib_id+' ');
-        }
-        return this._folded_CSS_select;
-    }
-    get maxDepth(){
-        return this._maxDepth;
-    }
-    set maxDepth(val){
-        this._maxDepth=val;
-        this._folded_CSS_select="";
-    }
-}
-ToolBox.prototype.bluePrint=getVEL_ThenDeleteElement("template_toolBox");
-
-class Ctrl_tgtAssets extends ExCtrl{
-    /**
-     * @param {CtrlBox_Data} data 
-     */
-    constructor(data){
-        super(data);
-        /** @type {CtrlBox_Data} */
-        this.data;
-        this.group_iterator=new Iterator__Tree(this.data.root_group,"data");
-        // 列表渲染使用的属性 open
-            /**@type {Map<Number,{d:Number,ed:Number}>} 被折叠的 index : 深度  */
-            this.folded_data=new Map();
-            /** @type {String[]} 选中的项的id*/
-            this.select_list=[];
-            
-        // 列表渲染使用的属性 end
-    }
-    /**@type {PrimitiveTGT__Group} 图元根路径 */
-    get root_group(){return this.data.root_group;}
-    set focus_tgt_path(val){this.data.focus_tgt_path=val;}
-    get focus_tgt_path(   ){return this.data.focus_tgt_path;}
-    set select_tgt_path(val){this.data.select_tgt_path=val;}
-    get select_tgt_path(   ){return this.data.select_tgt_path;}
-    /**重新定向操作对象
-     * @param {(Number|String)[]} path root 对象的子 的 下标形式的路径
-     * @param {Number} index 渲染到控件中时的下标
-     * @param {Boolean} f 追加还是修改
-     */
-    redirect_EditTGT(_path,index,f){
-        var ctrl_id="tgt_item-EX_for-tgt_list-C"+index;
-        var path=_path;
-        if(f){
-            // 追加
-            if(this.old_index===index){
-                // 移除
-                this.focus_tgt_path=[];
-                this.select_list.remove(ctrl_id);
-                this.old_index=-1;
-            }else{
-                if(this.select_list.indexOf(ctrl_id)===-1){
-                    // 增加
-                    this.select_list.unshift(ctrl_id);
-                    this.focus_tgt_path=path;
-                }else{
-                    // 转移 focus_tgt_path
-                    this.focus_tgt_path=path;
-                }
-                this.old_index=index;
-            }
-        }else{
-            // 修改
-            if((this.old_index===index)&&(this.select_tgt_path.length===1)){
-                this.select_list.length=0;
-                this.focus_tgt_path=[];
-                this.old_index=-1;
-            }else{
-                this.select_list.length=1;
-                this.select_list[0]=(ctrl_id);
-                this.focus_tgt_path=path;
-                this.old_index=index;
-            }
-        }
-        this.refresh_SelectTGT();
-        this.reRender();
-    }
-    refresh_SelectTGT(){
-        // es6 排序
-        var arr=Array.from(this.select_list);
-        arr.sort();
-        this.select_tgt_path=arr.map((item)=>{
-            return this.elements[item].path;
-        });
-    }
-    is_Focus(path){
-        return arrayEqual(path,this.focus_tgt_path);
-    }
-    /** 路径在被选中的中在哪里
-     * @param {Number[]} path 
-     * @returns {Number} 返回下标+1
-     */
-    focusIndex(path){
-        var i=this.select_tgt_path.length-1;
-        for(;i>=0;--i){
-            if(arrayEqual(path,this.select_tgt_path[i])){
-                return i+1;
-            }
-        }
-        return i+1;
-    }
-    /**隐藏对象 (不渲染)
-     * @param {(Number|String)[]} path 
-     */
-    change_editTGT_Visibility(path){
-        this.callParent(
-        /**
-         * @this {CtrlBox} 
-         */
-        function(){
-            this.change_editTGT_Visibility(path);
-        })
-    }
-    /**点击事件操作手柄
-     * @param {MouseEvent} e
-     */
-    clickHand_Item(e){
-        var element=e.target;
-        var temp;
-        if(Number(element.getAttribute("child_length"))){
-            return this.fold_Item(element);
-        }
-        if(Number(element.className.indexOf("ctrlBox-tgtAssets-focusBtn")!==-1)){
-            temp=element.parentElement;
-            return this.redirect_EditTGT(temp.path,Number(temp.getAttribute("index")),e.shiftKey);
-        }
-        if(Number(element.className.indexOf("ctrlBox-tgtAssets-visibility")!==-1)){
-            temp=element.parentElement;
-            var iconElement=element.firstElementChild;
-            if(iconElement.className==="iconSpritesSvg iconSpritesSvg-40"){
-                iconElement.className="iconSpritesSvg iconSpritesSvg-30"
-                return this.change_editTGT_Visibility(temp.path,Number(temp.getAttribute("index")),false);
-            }else{
-                iconElement.className="iconSpritesSvg iconSpritesSvg-40"
-                return this.change_editTGT_Visibility(temp.path,Number(temp.getAttribute("index")),true);
-            }
-        }
-    }
-    /**
-     * 折叠操作的函数
-     * @param {Element} element 
-     */
-    fold_Item(element){
-        var i=Number(element.getAttribute("index")),
-            d,ed,temp_element=element;
-        if(this.folded_data.has(i)){
-            this.folded_data.delete(i);
-        }else{
-            ed=i;
-            d=Number(element.getAttribute("depth"));
-
-            while((temp_element=temp_element.nextElementSibling)&&Number(temp_element.getAttribute("depth"))>d){
-                ++ed;
-            }
-            this.folded_data.set(i,{d:d,ed:ed});
-            
-        }
-        this.renderStyle();
-    }
-    /**
-     * 列表折叠样式
-     */
-    get folded_CSS_select(){
-        /*ctrlBox-tgtAssets-item-depth(d):nth-child(index)~li:not(ctrlBox-tgtAssets-item-depth(d):nth-child(index+1)~li)*/
-        var folded_data=this.folded_data,
-            folded_CSS_selects=[],
-            i,ed,data;
-        for(data of folded_data){
-            i=data[0];
-            ed=data[1].ed;
-            folded_CSS_selects.unshift(
-                ',.CtrlLib-'+this.c__ctrl_lib_id+" .ctrlBox-tgtAssets-item:nth-child(n+"+(i+1)+").ctrlBox-tgtAssets-item:nth-child(-n+"+(ed)+")"
-            );
-        }
-        return ".cnm"+folded_CSS_selects.join('');
-    }
-}
-Ctrl_tgtAssets.prototype.bluePrint=getVEL_ThenDeleteElement("template_ctrl_tgtAssets");
 
 Canvas_Main.prototype.childCtrlType={
     ToolBox,
