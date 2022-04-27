@@ -7,7 +7,7 @@
 
 
 import { arrayEqual, dependencyMapping, Iterator__Tree } from "../../../../basics/Basics.js";
-import { ExCtrl } from "../../../../ControlLib/CtrlLib.js"
+import { ExCtrl } from "../CtrlLib/CtrlLib.js"
 import { getVEL_ThenDeleteElement, global__primitiveTGT_editor } from "../Global.js";
 class Ctrl_tgtAssets extends ExCtrl{
     /**

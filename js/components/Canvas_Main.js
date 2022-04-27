@@ -1,16 +1,16 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-26 14:14:12
- * @FilePath: \def-web\js\visual\Editor\js\components\Canvas_Main.js
+ * @LastEditTime: 2022-04-27 21:12:28
+ * @FilePath: \PrimitivesTGT-2D_Editor\js\components\Canvas_Main.js
  */
-import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../../../../basics/Basics.js";
-import { addKeyEvent, KeyNotbook, stopPE } from "../../../../basics/dom_tool.js";
-import { deg } from "../../../../basics/math_ex.js";
-import { ExCtrl } from "../../../../ControlLib/CtrlLib.js"
-import { Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../../../Math2d.js";
+import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../basics/Basics.js";
+import { addKeyEvent, KeyNotbook, stopPE } from "../basics/dom_tool.js";
+import { deg } from "../basics/math_ex.js";
+import { ExCtrl } from "../CtrlLib/CtrlLib.js"
+import { Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2, Data_Arc, Data_Arc__Ellipse } from "../PrimitivesTGT_2D/Math2d.js";
 import { matrixToCSS } from "../../../MatrixController.js";
-import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, PrimitiveTGT } from "../../../PrimitivesTGT_2D.js";
+import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, PrimitiveTGT } from "../PrimitivesTGT_2D/PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../../../PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../../../visual.js";
 import { getVEL_ThenDeleteElement, global__primitiveTGT_editor } from "../Global.js";

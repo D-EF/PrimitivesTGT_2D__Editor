@@ -6,7 +6,7 @@
  */
 
 import { dependencyMapping, Iterator__Tree } from "../../../../basics/Basics.js";
-import { ExCtrl } from "../../../../ControlLib/CtrlLib.js";
+import { ExCtrl } from "../CtrlLib/CtrlLib.js";
 import { getVEL_ThenDeleteElement, hotkey } from "../Global.js";
 
 

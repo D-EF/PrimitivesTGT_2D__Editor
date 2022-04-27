@@ -1,3 +1,9 @@
+<!--
+ * @Date: 2022-04-27 20:05:22
+ * @LastEditors: Darth_Eternalfaith
+ * @LastEditTime: 2022-04-27 21:08:39
+ * @FilePath: \PrimitivesTGT-2D_Editor\README.md
+-->
 # PrimitivesTGT-2D_Exiter
 
 #### 介绍
@@ -5,13 +11,13 @@ PrimitivesTGT-2D的编辑器
 
 #### 软件架构
 软件架构说明
-
+* 使用 dom 框架 CtrlLib
+* 依赖于同组织的库 CtrlLib , Basics ,  PrimitiveesTGT_2D
+* 依赖一个 CtrlLib 的 ui 库
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  丢进 http 服务器即可直接使用
 
 #### 使用说明
 
