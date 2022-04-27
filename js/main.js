@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-25 14:52:40
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-26 20:24:13
+ * @LastEditTime: 2022-04-27 16:59:56
  * @FilePath: \def-web\js\visual\Editor\js\main.js
  */
 import {Canvas_Main} from "./components/Canvas_Main.js"
@@ -22,4 +22,3 @@ var canvasMain=new Canvas_Main();
 canvasMain.addend(document.body);
 
 window.cnmd=canvasMain.child_ctrl.toolBox;
-cnmd.reRender();
