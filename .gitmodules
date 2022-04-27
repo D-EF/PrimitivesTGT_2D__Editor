@@ -6,3 +6,7 @@
 	url  = https://gitee.com/darth_ef/PrimitivesTGT-2D
 	path = js/PrimitivesTGT_2D
 
+[submodule "js/basics"]
+	url  = https://gitee.com/darth_ef/basics
+	path = js/basics
+
