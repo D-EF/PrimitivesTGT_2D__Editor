@@ -14,3 +14,7 @@
 	url  = https://gitee.com/darth_ef/def-ui-lib
 	path = css/DEF_UI
 
+[submodule "js/import/CtrlLib__EXDEF_LIB"]
+	url  = https://gitee.com/RouwanLW/attendance
+	path = js/import/CtrlLib__EXDEF_LIB
+
