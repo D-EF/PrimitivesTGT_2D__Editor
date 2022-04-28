@@ -8,5 +8,5 @@
 
 [submodule "js/basics"]
 	url  = https://gitee.com/darth_ef/basics
-	path = js/basics
+	path = js/import/basics
 
