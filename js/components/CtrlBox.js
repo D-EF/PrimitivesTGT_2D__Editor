@@ -5,7 +5,7 @@
  * @FilePath: \def-web\js\visual\Editor\js\components\CtrlBox.js
  */
 
-import { ExCtrl } from "../CtrlLib/CtrlLib.js";
+import { ExCtrl } from "../import/CtrlLib/CtrlLib.js";
 import { getVEL_ThenDeleteElement } from "../Global.js";
 import { Ctrl_tgtAssets } from "./TGTAssets.js";
 class CtrlBox extends ExCtrl{

@@ -1,12 +1,12 @@
 /*
  * @Date: 2022-04-26 10:11:42
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-26 10:21:04
- * @FilePath: \def-web\js\visual\Editor\js\components\ContextMenu.js
+ * @LastEditTime: 2022-04-28 11:24:07
+ * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\components\ContextMenu.js
  */
 
-import { add_DependencyListener } from "../../../../basics/Basics.js";
-import { ExCtrl } from "../CtrlLib/CtrlLib.js";
+import { add_DependencyListener } from "../import/basics/Basics.js";
+import { ExCtrl } from "../import/CtrlLib/CtrlLib.js";
 import { getVEL_ThenDeleteElement } from "../Global.js";
 
 /**

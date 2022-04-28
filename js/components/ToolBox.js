@@ -5,8 +5,8 @@
  * @FilePath: \def-web\js\visual\Editor\js\components\ToolBox.js
  */
 
-import { dependencyMapping, Iterator__Tree } from "../../../../basics/Basics.js";
-import { ExCtrl } from "../CtrlLib/CtrlLib.js";
+import { dependencyMapping, Iterator__Tree } from ".././import/basics/Basics.js";
+import { ExCtrl } from "../import/CtrlLib/CtrlLib.js";
 import { getVEL_ThenDeleteElement, hotkey } from "../Global.js";
 
 

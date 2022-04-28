@@ -1,17 +1,16 @@
 /*
  * @Date: 2022-04-25 15:34:16
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-26 11:08:10
- * @FilePath: \def-web\js\visual\Editor\js\Global.js
+ * @LastEditTime: 2022-04-28 11:25:02
+ * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\Global.js
  */
 
 
 import {
-    DEF_VirtualElementList as VEL,
-    ExCtrl
-} from "../../../ControlLib/CtrlLib.js"
+    DEF_VirtualElementList as VEL
+} from "./import/CtrlLib/CtrlLib.js"
 
-import { Act_History, ArrayEqual_EqualObj, dependencyMapping } from "../../../basics/Basics.js";
+import { Act_History, ArrayEqual_EqualObj, dependencyMapping } from "./import/basics/Basics.js";
 import { PrimitiveTGT__Group } from "../../PrimitivesTGT_2D.js";
 
 /** @type {Act_History} 操作的历史记录 */
