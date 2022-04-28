@@ -10,3 +10,7 @@
 	url  = https://gitee.com/darth_ef/basics
 	path = js/import/basics
 
+[submodule "css/DEF_UI"]
+	url  = https://gitee.com/darth_ef/def-ui-lib
+	path = css/DEF_UI
+
