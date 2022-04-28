@@ -1,6 +1,6 @@
 [submodule "js/CtrlLib"]
 	url  = https://gitee.com/darth_ef/ctrl-lib
-	path = js/inport/CtrlLib
+	path = js/import/CtrlLib
 
 [submodule "js/PrimitivesTGT_2D"]
 	url  = https://gitee.com/darth_ef/PrimitivesTGT-2D
