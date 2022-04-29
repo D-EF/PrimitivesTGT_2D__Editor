@@ -1,10 +1,10 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-28 11:19:52
+ * @LastEditTime: 2022-04-29 13:07:01
  * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\components\Canvas_Main.js
  */
-import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../basics/Basics.js";
+import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../import/basics/Basics.js";
 import { addKeyEvent, KeyNotbook, stopPE } from "../import/basics/dom_tool.js";
 import { deg } from "../import/basics/math_ex.js";
 import { ExCtrl } from "../import/CtrlLib/CtrlLib.js"

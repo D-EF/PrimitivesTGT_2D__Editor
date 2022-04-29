@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-25 15:34:16
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-28 11:25:02
+ * @LastEditTime: 2022-04-29 13:07:42
  * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\Global.js
  */
 
@@ -11,7 +11,7 @@ import {
 } from "./import/CtrlLib/CtrlLib.js"
 
 import { Act_History, ArrayEqual_EqualObj, dependencyMapping } from "./import/basics/Basics.js";
-import { PrimitiveTGT__Group } from "../../PrimitivesTGT_2D.js";
+import { PrimitiveTGT__Group } from "./import/PrimitivesTGT_2D/PrimitivesTGT_2D.js";
 
 /** @type {Act_History} 操作的历史记录 */
 var primitiveTGT_act_history=new Act_History(new PrimitiveTGT__Group);
