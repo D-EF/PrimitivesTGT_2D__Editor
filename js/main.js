@@ -1,10 +1,12 @@
 /*
  * @Date: 2022-04-25 14:52:40
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-27 16:59:56
- * @FilePath: \def-web\js\visual\Editor\js\main.js
+ * @LastEditTime: 2022-05-04 20:54:49
+ * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\main.js
  */
 import {Canvas_Main} from "./components/Canvas_Main.js"
+import { CtrlLib__EXDEF_LIB__XML_DL } from "./import/CtrlLib__EXDEF_LIB/CtrlLib_EXDEF_LIB.js";
+CtrlLib__EXDEF_LIB__XML_DL
 
 
 // 阻止关闭页面
