@@ -1,13 +1,11 @@
 /*
  * @Date: 2022-04-25 14:52:40
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-05-04 20:54:49
+ * @LastEditTime: 2022-05-05 15:16:40
  * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\main.js
  */
 import {Canvas_Main} from "./components/Canvas_Main.js"
-import { CtrlLib__EXDEF_LIB__XML_DL } from "./import/CtrlLib__EXDEF_LIB/CtrlLib_EXDEF_LIB.js";
-CtrlLib__EXDEF_LIB__XML_DL
-
+import { Viewport_Frame } from "./import/CtrlLib__EXDEF_LIB/Viewport_Frame.js";
 
 // 阻止关闭页面
 function addOnBeforeUnload(e){
@@ -20,7 +18,7 @@ if(window.attachEvent){
 	window.addEventListener('beforeunload', addOnBeforeUnload, false);
 }
 
-var canvasMain=new Canvas_Main();
+var canvasMain=new Viewport_Frame();
 canvasMain.addend(document.body);
 
 window.cnmd=canvasMain.child_ctrl.toolBox;
