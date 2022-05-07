@@ -1,8 +1,8 @@
 /*
  * @Date: 2022-04-25 14:52:40
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-05-05 15:16:40
- * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\main.js
+ * @LastEditTime: 2022-05-07 15:45:59
+ * @FilePath: \PrimitivesTGT-2D_Editor\js\main.js
  */
 import {Canvas_Main} from "./components/Canvas_Main.js"
 import { Viewport_Frame } from "./import/CtrlLib__EXDEF_LIB/Viewport_Frame.js";
@@ -19,6 +19,7 @@ if(window.attachEvent){
 }
 
 var canvasMain=new Viewport_Frame();
+Viewport_Frame.prototype.childCtrlType.null=Canvas_Main;
 canvasMain.addend(document.body);
 
 window.cnmd=canvasMain.child_ctrl.toolBox;
