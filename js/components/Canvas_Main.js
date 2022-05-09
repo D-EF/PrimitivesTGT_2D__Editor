@@ -1,8 +1,8 @@
 /*
  * @Date: 2022-02-14 21:12:46
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-29 16:24:43
- * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\components\Canvas_Main.js
+ * @LastEditTime: 2022-05-09 16:01:00
+ * @FilePath: \PrimitivesTGT-2D_Editor\js\components\Canvas_Main.js
  */
 import { Act_History, add_DependencyListener, arrayDiff, arrayEqual, ArrayEqual_EqualObj, Delegate, dependencyMapping, Iterator__Tree } from "../import/basics/Basics.js";
 import { addKeyEvent, KeyNotbook, stopPE } from "../import/basics/dom_tool.js";
@@ -12,10 +12,10 @@ import { Math2D,Matrix2x2, Matrix2x2T, Polygon, Data_Rect, Data_Sector, Vector2,
 import { Material, PrimitiveTGT__Arc, PrimitiveTGT__Rect, PrimitiveTGT__Group, PrimitiveTGT__Polygon, PrimitiveTGT__Path, PrimitiveTGT } from "../import/PrimitivesTGT_2D/PrimitivesTGT_2D.js";
 import { Canvas2d__Material, Renderer_PrimitiveTGT__Canvas2D, CtrlCanvas2d } from "../import/PrimitivesTGT_2D/PrimitivesTGT_2D_CanvasRenderingContext2D.js";
 import { AnimationCtrl } from "../import/PrimitivesTGT_2D/visual.js";
-import { getVEL_ThenDeleteElement, global__primitiveTGT_editor } from "../Global.js";
+import { getVEL_ThenDeleteElement, global__primitiveTGT_editor, hotkey } from "../Global.js";
 import { ContextMenu } from "./ContextMenu.js";
 import { CtrlBox } from "./CtrlBox.js";
-import { ToolBox } from "./ToolBox.js";
+import { ToolBox } from "../import/CtrlLib__EXDEF_LIB/ToolBox.js";
 
 /** 
  * @this {Canvas_Main}
@@ -472,9 +472,7 @@ class Canvas_Main extends ExCtrl{
 
     // 子控件初始化函数 open
         toolbox_Init(){
-            var d={};
-            // dependencyMapping(d,this,["list"],["tool_list"]);
-            return d ;
+            return hotkey;
         }
         ctrlbox_Init(){
             var d={};

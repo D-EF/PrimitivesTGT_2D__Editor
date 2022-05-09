@@ -1,8 +1,8 @@
 /*
  * @Date: 2022-04-25 15:34:16
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-04-29 13:07:42
- * @FilePath: \Editor\PrimitivesTGT-2D_Editor\js\Global.js
+ * @LastEditTime: 2022-05-09 15:24:28
+ * @FilePath: \PrimitivesTGT-2D_Editor\js\Global.js
  */
 
 
@@ -13,18 +13,11 @@ import {
 import { Act_History, ArrayEqual_EqualObj, dependencyMapping } from "./import/basics/Basics.js";
 import { PrimitiveTGT__Group } from "./import/PrimitivesTGT_2D/PrimitivesTGT_2D.js";
 
+/** @typedef {import("./import/CtrlLib__EXDEF_LIB/ToolBox.js").Tool_Node} Tool_Node */
+
 /** @type {Act_History} 操作的历史记录 */
 var primitiveTGT_act_history=new Act_History(new PrimitiveTGT__Group);
 
-/**
- * @typedef Tool_Node 工具
- * @property {String} hotkey    热键
- * @property {String} tip       提示
- * @property {String} cmd     用于 cqrs 的命令
- * @property {Number} u         图标在精灵图的坐标
- * @property {Number} v         图标在精灵图的坐标
- * @property {Tool_Node[]} [chlid] 子节点
- */
 var _hotkey={
     /**@type {Tool_Node} 工具栏 */
     tool_list:{
