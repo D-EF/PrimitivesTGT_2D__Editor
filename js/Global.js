@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-25 15:34:16
  * @LastEditors: Darth_Eternalfaith
- * @LastEditTime: 2022-05-09 15:24:28
+ * @LastEditTime: 2022-05-18 14:28:36
  * @FilePath: \PrimitivesTGT-2D_Editor\js\Global.js
  */
 
@@ -23,29 +23,29 @@ var _hotkey={
     tool_list:{
         cmd:"base",
         child:[
-            {hotkey:["KeyQ"],tip:"Cursor",cmd:null,u:5,v:3},
-            {hotkey:["KeyA"],tip:"Create",cmd:"create",u:3,v:1,
+            {hotkey:["KeyQ"],tip:"Cursor",cmd:null,icon_key:"53"},
+            {hotkey:["KeyA"],tip:"Create",cmd:"create",icon_key:"31",
                 back_all_key_flag:true,
                 child:[
-                    {hotkey:["KeyR"],tip:"Rect"   ,cmd:"create rect"   ,u:0,v:5},
-                    {hotkey:["KeyA"],tip:"Arc"    ,cmd:"create arc"    ,u:1,v:5},
-                    {hotkey:["KeyS"],tip:"Sector" ,cmd:"create sector" ,u:2,v:5},
-                    {hotkey:["KeyD"],tip:"Polygon",cmd:"create polygon",u:3,v:5},
-                    {hotkey:["KeyC"],tip:"Path"   ,cmd:"create path"   ,u:5,v:5},
+                    {hotkey:["KeyR"],tip:"Rect"   ,cmd:"create rect"   ,icon_key:"05"},
+                    {hotkey:["KeyA"],tip:"Arc"    ,cmd:"create arc"    ,icon_key:"15"},
+                    {hotkey:["KeyS"],tip:"Sector" ,cmd:"create sector" ,icon_key:"25"},
+                    {hotkey:["KeyD"],tip:"Polygon",cmd:"create polygon",icon_key:"35"},
+                    {hotkey:["KeyC"],tip:"Path"   ,cmd:"create path"   ,icon_key:"55"},
                 ]
             },
-            {hotkey:['F2']  ,tip:"Rename" ,cmd:"rename" ,u:2,v:4,},
-            {hotkey:['Ctrl',"Space"]  ,tip:"Edit" ,cmd:"Edit" ,u:1,v:3,
+            {hotkey:['F2']  ,tip:"Rename" ,cmd:"rename" ,icon_key:"24",},
+            {hotkey:['Ctrl',"Space"]  ,tip:"Edit" ,cmd:"Edit" ,icon_key:"13",
                 child:[
-                    {hotkey:['KeyG'],tip:"Move"   ,cmd:"move"   ,u:9,v:3,},
-                    {hotkey:['KeyS'],tip:"Scale"  ,cmd:"scale"  ,u:6,v:2,},
-                    {hotkey:['KeyR'],tip:"Rotate" ,cmd:"rotate" ,u:1,v:1,},
+                    {hotkey:['KeyG'],tip:"Move"   ,cmd:"move"   ,icon_key:"93",},
+                    {hotkey:['KeyS'],tip:"Scale"  ,cmd:"scale"  ,icon_key:"62",},
+                    {hotkey:['KeyR'],tip:"Rotate" ,cmd:"rotate" ,icon_key:"11",},
                 ]
             },
-            // {hotkey:['KeyM'],tip:"Linear mapping" ,cmd:"rotate" ,u:6,v:5},
-            {hotkey:['Ctrl','KeyG'],tip:"Group" ,cmd:"create Group"   ,u:7,v:3},
-            {hotkey:['Ctrl','KeyJ'],tip:"Copy & Paste"    ,cmd:"CV"   ,u:4,v:3,},
-            {hotkey:['Ctrl','Shift',"KeyJ"],tip:"Copy & Paste (SameReference)" ,cmd:"copy_SameReference" ,u:8,v:4},
+            // {hotkey:['KeyM'],tip:"Linear mapping" ,cmd:"rotate" ,icon_key:"65"},
+            {hotkey:['Ctrl','KeyG'],tip:"Group" ,cmd:"create Group"   ,icon_key:"73"},
+            {hotkey:['Ctrl','KeyJ'],tip:"Copy & Paste"    ,cmd:"CV"   ,icon_key:"43",},
+            {hotkey:['Ctrl','Shift',"KeyJ"],tip:"Copy & Paste (SameReference)" ,cmd:"copy_SameReference" ,icon_key:"84"},
         ]
     },
 

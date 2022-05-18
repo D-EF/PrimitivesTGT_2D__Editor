@@ -30,7 +30,6 @@ body {
 }
 
 :root {
-    --toolbox-width: 2.4em;
     --ctrlbox-width: 240rem;
     --command_status_height:26px;
 }
@@ -107,29 +106,6 @@ body {
 .ctrlBox-box label {
     font-size: 12px;
 }
-.toolBox-list{
-    height:0;
-}
-.toolBox-item {
-    width: var(--toolbox-width);
-    height: var(--toolbox-width);
-    border: #080 solid 1px;
-    background-color: var(--colorD0)
-}
-
-.toolBox-item-icon {
-    display: block;
-    width: 100%;
-    padding-top: 100%;
-    background-color: var(--colorD);
-    pointer-events: none;
-    /* cursor: pointer; */
-}
-
-.toolBox-item:hover .toolBox-item-icon {
-    background-color: var(--colorC);
-}
-
 
 .ctrlBox-subModuleBox {
     padding: 2px;
